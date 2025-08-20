@@ -262,7 +262,7 @@ This simple interface provides all necessary information for filtering while mai
 ```lua
 filter = function(template)
   -- Hide work templates on weekends
-  if template.source == "work" then
+  if template.config.name == "work" then
     return os.date("%w") ~= "0" and os.date("%w") ~= "6"
   end
 
