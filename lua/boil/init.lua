@@ -3,6 +3,7 @@ local config = require "boil.config"
 local templates = require "boil.templates"
 local expander = require "boil.expander"
 local logger = require "boil.logger"
+local utils = require "boil.utils"
 
 require "boil.types"
 
@@ -18,9 +19,10 @@ M.setup = function(user_config)
   end
 
   vim.api.nvim_create_user_command("Boil", function(opts)
-    M.insert_template(opts.args)
+    local template_path, runtime_vars = utils.parse_args(opts.fargs)
+    M.insert_template(template_path, runtime_vars)
   end, {
-    nargs = "?",
+    nargs = "*",
     complete = function()
       local template_list = templates.find_templates(config.get())
       local paths = {}
@@ -34,14 +36,15 @@ end
 
 ---Insert template into current buffer
 ---@param template_name? string Optional template path to insert directly
-M.insert_template = function(template_name)
+---@param runtime_variables? table<string, string> Runtime variables to use during expansion
+M.insert_template = function(template_name, runtime_variables)
   local cfg = config.get()
   local template_list = templates.find_templates(cfg)
 
   local function insert_content(template)
     local content = templates.load_template(template.path)
     if content then
-      local expanded, err = expander.expand(content, cfg, template.config)
+      local expanded, err = expander.expand(content, cfg, template.config, runtime_variables)
       if err then
         logger.warn("Template expansion warnings:\n" .. err)
       end

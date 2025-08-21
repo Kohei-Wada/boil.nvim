@@ -6,16 +6,20 @@ require "boil.types"
 ---@param template_content string Template content with {{variable}} placeholders
 ---@param config Config Global configuration
 ---@param template_config? TemplateConfig Template-specific configuration
+---@param runtime_variables? table<string, string> Runtime variables with highest priority
 ---@return string|nil expanded_content Content with variables expanded
 ---@return string|nil error_message Error message if expansion failed
-M.expand = function(template_content, config, template_config)
+M.expand = function(template_content, config, template_config, runtime_variables)
   local result = template_content
   local errors = {}
 
-  -- Merge variables: global < template-specific
+  -- Merge variables: global < template-specific < runtime
   local variables = vim.tbl_extend("force", {}, config.variables or {})
   if template_config and template_config.variables then
     variables = vim.tbl_extend("force", variables, template_config.variables)
+  end
+  if runtime_variables then
+    variables = vim.tbl_extend("force", variables, runtime_variables)
   end
 
   -- Process all variables uniformly
