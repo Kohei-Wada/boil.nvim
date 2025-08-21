@@ -9,22 +9,22 @@ M.defaults = {
     return true
   end,
   variables = {
-    filename = function()
+    __filename__ = function()
       local filename = vim.fn.expand "%:t"
       if filename == "" then
         filename = "untitled"
       end
       return filename
     end,
-    basename = function()
+    __basename__ = function()
       local basename = vim.fn.expand "%:t:r"
       if basename == "" then
         basename = "untitled"
       end
       return basename
     end,
-    author = vim.env.USER or "",
-    date = function()
+    __author__ = vim.env.USER or "",
+    __date__ = function()
       return os.date "%Y-%m-%d"
     end,
   },

@@ -6,7 +6,7 @@ A Neovim plugin for automatic boilerplate template insertion when creating new f
 
 - **Manual Template Insertion**: Use `:Boil` command for intentional template insertion
 - **Multiple Template Directories**: Support personal, team, and project-specific templates with priority ordering
-- **Variable Expansion**: Support placeholders like `{{filename}}`, `{{date}}`, `{{author}}`
+- **Variable Expansion**: Support placeholders like `{{__filename__}}`, `{{__date__}}`, `{{__author__}}`
 - **Flexible Filtering**: Directory-specific and global filters to control template visibility
 - **Telescope Integration**: Enhanced UI with preview and theme support
 - **Recursive Template Discovery**: Automatically finds templates in subdirectories
@@ -71,10 +71,10 @@ require('boil').setup({
   },
   variables = {
     -- Global variables available to all templates
-    filename = function() return vim.fn.expand("%:t") end,
-    basename = function() return vim.fn.expand("%:t:r") end,
-    date = function() return os.date("%Y-%m-%d") end,
-    author = "Default Author"
+    __filename__ = function() return vim.fn.expand("%:t") end,
+    __basename__ = function() return vim.fn.expand("%:t:r") end,
+    __date__ = function() return os.date("%Y-%m-%d") end,
+    __author__ = "Default Author"
   },
   filter = function(template)
     -- Global filter applied after source-specific filters
@@ -118,9 +118,9 @@ require('telescope').load_extension('boil')
 ```python
 #!/usr/bin/env python3
 """
-{{filename}}
-Author: {{author}}
-Date: {{date}}
+{{__filename__}}
+Author: {{__author__}}
+Date: {{__date__}}
 """
 
 def main():
@@ -134,15 +134,15 @@ if __name__ == "__main__":
 ```jsx
 import React from 'react';
 
-const {{basename}} = () => {
+const {{__basename__}} = () => {
   return (
     <div>
-      <h1>{{basename}}</h1>
+      <h1>{{__basename__}}</h1>
     </div>
   );
 };
 
-export default {{basename}};
+export default {{__basename__}};
 ```
 
 ## Variable System
@@ -193,10 +193,12 @@ variables = {
 
 ### Built-in Variables
 
-- `{{filename}}` - Current file name with extension
-- `{{basename}}` - Current file name without extension
-- `{{date}}` - Current date (YYYY-MM-DD)
-- `{{author}}` - Author name from configuration
+Built-in variables use the `__` prefix to distinguish them from user-defined variables:
+
+- `{{__filename__}}` - Current file name with extension
+- `{{__basename__}}` - Current file name without extension
+- `{{__date__}}` - Current date (YYYY-MM-DD)
+- `{{__author__}}` - Author name from configuration
 
 ### Custom Variables
 

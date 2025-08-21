@@ -15,19 +15,19 @@ describe("boil.config", function()
       assert.is_table(options.templates)
       assert.is_not_nil(options.variables)
       assert.is_table(options.variables)
-      assert.is_not_nil(options.variables.author)
+      assert.is_not_nil(options.variables.__author__)
     end)
 
     it("should merge user config with defaults", function()
       config.setup {
         variables = {
-          author = "Test Author",
+          __author__ = "Test Author",
           custom_var = "custom value",
         },
       }
       local options = config.get()
 
-      assert.equals("Test Author", options.variables.author)
+      assert.equals("Test Author", options.variables.__author__)
       assert.equals("custom value", options.variables.custom_var)
       assert.is_table(options.templates)
     end)
@@ -35,8 +35,8 @@ describe("boil.config", function()
     it("should expand template directory paths", function()
       config.setup {
         templates = {
-          { path = "~/personal", variables = { author = "Personal" } },
-          { path = "$HOME/company", variables = { author = "Company", company = "ACME" } },
+          { path = "~/personal", variables = { __author__ = "Personal" } },
+          { path = "$HOME/company", variables = { __author__ = "Company", company = "ACME" } },
         },
       }
       local options = config.get()
@@ -46,8 +46,8 @@ describe("boil.config", function()
       -- Templates are directory-only now
       assert.is_nil(options.templates[1].path:match "^~")
       assert.is_nil(options.templates[2].path:match "%$HOME")
-      assert.equals("Personal", options.templates[1].variables.author)
-      assert.equals("Company", options.templates[2].variables.author)
+      assert.equals("Personal", options.templates[1].variables.__author__)
+      assert.equals("Company", options.templates[2].variables.__author__)
       assert.equals("ACME", options.templates[2].variables.company)
     end)
 
@@ -72,7 +72,7 @@ describe("boil.config", function()
     it("should have empty templates by default", function()
       config.setup {
         variables = {
-          author = "New Author",
+          __author__ = "New Author",
         },
       }
       local options = config.get()
@@ -167,13 +167,13 @@ describe("boil.config", function()
     it("should return options after setup", function()
       config.setup {
         variables = {
-          author = "Test",
+          __author__ = "Test",
         },
       }
       local options = config.get()
 
       assert.is_not_nil(options)
-      assert.equals("Test", options.variables.author)
+      assert.equals("Test", options.variables.__author__)
     end)
   end)
 end)

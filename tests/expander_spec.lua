@@ -8,17 +8,17 @@ describe("boil.expander", function()
 
   describe("expand", function()
     it("should expand basic variables", function()
-      local template = "File: {{filename}}\nBase: {{basename}}\nDate: {{date}}\nAuthor: {{author}}"
+      local template = "File: {{__filename__}}\nBase: {{__basename__}}\nDate: {{__date__}}\nAuthor: {{__author__}}"
       local config = {
         variables = {
-          filename = function()
+          __filename__ = function()
             return "test.lua"
           end,
-          basename = function()
+          __basename__ = function()
             return "test"
           end,
-          author = "Test Author",
-          date = function()
+          __author__ = "Test Author",
+          __date__ = function()
             return "2024-01-01"
           end,
         },
