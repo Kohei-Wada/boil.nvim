@@ -108,5 +108,69 @@ describe("boil.utils", function()
       assert.equals("João", runtime_vars.author)
       assert.equals("こんにちは", runtime_vars.message)
     end)
+
+    it("should handle values with spaces (pre-parsed)", function()
+      -- Note: These would be pre-parsed by shell/Vim, so we test the result
+      local args = { "template.py", "description=Hello World", "path=/path with spaces" }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      assert.equals("Hello World", runtime_vars.description)
+      assert.equals("/path with spaces", runtime_vars.path)
+    end)
+
+    it("should handle values with newlines and tabs", function()
+      local args = { "template.py", "multiline=line1\nline2", "tabbed=col1\tcol2" }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      assert.equals("line1\nline2", runtime_vars.multiline)
+      assert.equals("col1\tcol2", runtime_vars.tabbed)
+    end)
+
+    it("should handle values with various whitespace characters", function()
+      local args = { "template.py", "spaces=   multiple   spaces   ", "mixed= \t\n mixed \r\n " }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      assert.equals("   multiple   spaces   ", runtime_vars.spaces)
+      assert.equals(" \t\n mixed \r\n ", runtime_vars.mixed)
+    end)
+
+    it("should handle special escape sequences", function()
+      local args = { "template.py", "backslash=path\\to\\file", 'quote=She said "Hello"' }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      assert.equals("path\\to\\file", runtime_vars.backslash)
+      assert.equals('She said "Hello"', runtime_vars.quote)
+    end)
+
+    it("should handle empty values with quotes", function()
+      local args = { "template.py", 'empty=""', "single=''" }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      assert.equals("", runtime_vars.empty)
+      assert.equals("", runtime_vars.single)
+    end)
+
+    it("should handle values with only whitespace", function()
+      local args = { "template.py", "spaces=   ", "tabs=\t\t\t" }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      assert.equals("   ", runtime_vars.spaces)
+      assert.equals("\t\t\t", runtime_vars.tabs)
+    end)
+
+    it("should handle complex quoted values with special chars", function()
+      local args = { "template.py", 'json={"key": "value with spaces"}', "regex='\\d+\\.\\d+'" }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      assert.equals('{"key": "value with spaces"}', runtime_vars.json)
+      assert.equals("\\d+\\.\\d+", runtime_vars.regex)
+    end)
   end)
 end)
