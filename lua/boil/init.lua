@@ -45,6 +45,10 @@ M.insert_template = function(template_name)
       if err then
         logger.warn("Template expansion warnings:\n" .. err)
       end
+      if not expanded then
+        logger.error("Failed to expand template: " .. template.path)
+        return
+      end
 
       local lines = vim.split(expanded, "\n", { plain = true })
       local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
