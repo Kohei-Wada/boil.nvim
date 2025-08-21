@@ -44,4 +44,9 @@ M.parse_args = function(args_list)
   return template_path, runtime_vars
 end
 
+---Unescape common escape sequences in string values (public function)
+---@param str string String that may contain escape sequences
+---@return string unescaped_string String with escape sequences converted
+M.unescape_string = unescape_string
+
 return M

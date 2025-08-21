@@ -138,6 +138,28 @@ describe("boil.utils", function()
       assert.equals("C:\\Users\\test", runtime_vars.path)
     end)
 
+    it("should ignore extra non-key=value arguments after template path", function()
+      local args = { "template.py", "ignored_arg1", "ignored_arg2", "author=John", "project=test" }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      assert.equals("John", runtime_vars.author)
+      assert.equals("test", runtime_vars.project)
+      -- ignored_arg1 and ignored_arg2 should not affect the result
+    end)
+
+    it("should handle the example case: var var1 var2 x=a y=c", function()
+      local args = { "var", "var1", "var2", "x=a", "y=c" }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("var", template_path) -- First non-key=value arg
+      assert.equals("a", runtime_vars.x)
+      assert.equals("c", runtime_vars.y)
+      -- var1 and var2 should be ignored
+      assert.is_nil(runtime_vars.var1)
+      assert.is_nil(runtime_vars.var2)
+    end)
+
     it("should handle values with spaces (pre-parsed)", function()
       -- Note: These would be pre-parsed by shell/Vim, so we test the result
       local args = { "template.py", "description=Hello World", "path=/path with spaces" }
