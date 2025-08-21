@@ -290,5 +290,86 @@ describe("boil.expander", function()
       assert.is_not_nil(result:match "C: runtime_c") -- Runtime over template and global
       assert.is_not_nil(result:match "D: global_d") -- Global only
     end)
+
+    it("should handle runtime variables with newline characters", function()
+      local template = "Description: {{description}}\nCode: {{code}}"
+      local config = {
+        variables = {
+          description = "Single line description",
+        },
+      }
+      local runtime_variables = {
+        description = "Multi-line\ndescription\nwith breaks",
+        code = "function test() {\n  return true;\n}",
+      }
+
+      local result = expander.expand(template, config, nil, runtime_variables)
+
+      -- Check that newlines are preserved
+      assert.is_not_nil(result:match "Description: Multi%-line\ndescription\nwith breaks")
+      assert.is_not_nil(result:match "Code: function test%(%) %{\n  return true;\n%}")
+    end)
+
+    it("should handle runtime variables with various whitespace characters", function()
+      local template = "Spaced: {{spaced}}\nTabbed: {{tabbed}}\nMixed: {{mixed}}"
+      local runtime_variables = {
+        spaced = "  has   spaces  ",
+        tabbed = "\thas\ttabs\t",
+        mixed = " \t\n mixed \r\n content \t ",
+      }
+
+      local result = expander.expand(template, { variables = {} }, nil, runtime_variables)
+
+      -- Verify whitespace is preserved exactly
+      assert.is_not_nil(result:match "Spaced:   has   spaces  ")
+      assert.is_not_nil(result:match "Tabbed: \thas\ttabs\t")
+      assert.is_not_nil(result:match "Mixed:  \t\n mixed \r\n content \t ")
+    end)
+
+    it("should handle runtime variables with special regex characters", function()
+      local template = "Pattern: {{pattern}}\nRegex: {{regex}}"
+      local runtime_variables = {
+        pattern = "*.js files",
+        regex = "^[a-zA-Z]+$",
+      }
+
+      local result = expander.expand(template, { variables = {} }, nil, runtime_variables)
+
+      -- These should work correctly despite containing regex special chars
+      assert.is_not_nil(result:match "Pattern: %*%.js files")
+      assert.is_not_nil(result:match "Regex: %^%[a%-zA%-Z%]%+%$")
+    end)
+
+    it("should handle runtime variables with percent characters", function()
+      local template = "Progress: {{progress}}\nFormat: {{format}}\nMessage: {{message}}"
+      local runtime_variables = {
+        progress = "Loading: 100% complete",
+        format = "Use %s for string and %d for numbers",
+        message = "Result: 50% success rate\n%s will be processed next",
+      }
+
+      local result = expander.expand(template, { variables = {} }, nil, runtime_variables)
+
+      -- Verify percent characters are handled correctly
+      assert.is_not_nil(result:match "Progress: Loading: 100%% complete")
+      assert.is_not_nil(result:match "Format: Use %%s for string and %%d for numbers")
+      assert.is_not_nil(result:match "Message: Result: 50%% success rate\n%%s will be processed next")
+    end)
+
+    it("should handle runtime variables with complex multiline content", function()
+      local template = "Script: {{script}}\nSQL: {{sql}}"
+      local runtime_variables = {
+        script = '#!/bin/bash\necho "Progress: 100%"\nif [ $# -eq 0 ]; then\n  echo "No args"\nfi',
+        sql = "SELECT *\nFROM users\nWHERE name LIKE '%john%'\n  AND status = 'active';",
+      }
+
+      local result = expander.expand(template, { variables = {} }, nil, runtime_variables)
+
+      -- Check that complex multiline content with % chars is preserved
+      assert.is_not_nil(result:match "Script: #!/bin/bash")
+      assert.is_not_nil(result:match 'echo "Progress: 100%%"')
+      assert.is_not_nil(result:match "SQL: SELECT %*")
+      assert.is_not_nil(result:match "WHERE name LIKE '%%john%%'")
+    end)
   end)
 end)

@@ -109,6 +109,35 @@ describe("boil.utils", function()
       assert.equals("こんにちは", runtime_vars.message)
     end)
 
+    it("should unescape common escape sequences in values", function()
+      local args =
+        { "template.py", "multiline=line1\\nline2\\nline3", "tabbed=col1\\tcol2", 'quote=She said \\"Hello\\"' }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      assert.equals("line1\nline2\nline3", runtime_vars.multiline)
+      assert.equals("col1\tcol2", runtime_vars.tabbed)
+      assert.equals('She said "Hello"', runtime_vars.quote)
+    end)
+
+    it("should handle mixed escaped and unescaped sequences", function()
+      local args = { "template.py", "mixed=Path: C:\\\\temp\\nNewline here\\tTab here", "backslash=Keep \\\\ this" }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      assert.equals("Path: C:\\temp\nNewline here\tTab here", runtime_vars.mixed)
+      assert.equals("Keep \\ this", runtime_vars.backslash)
+    end)
+
+    it("should handle escape sequences in quoted values", function()
+      local args = { "template.py", 'message="Hello\\nWorld\\tTab"', "path='C:\\\\Users\\\\test'" }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      assert.equals("Hello\nWorld\tTab", runtime_vars.message)
+      assert.equals("C:\\Users\\test", runtime_vars.path)
+    end)
+
     it("should handle values with spaces (pre-parsed)", function()
       -- Note: These would be pre-parsed by shell/Vim, so we test the result
       local args = { "template.py", "description=Hello World", "path=/path with spaces" }
@@ -137,8 +166,8 @@ describe("boil.utils", function()
       assert.equals(" \t\n mixed \r\n ", runtime_vars.mixed)
     end)
 
-    it("should handle special escape sequences", function()
-      local args = { "template.py", "backslash=path\\to\\file", 'quote=She said "Hello"' }
+    it("should handle literal backslashes and escape sequences", function()
+      local args = { "template.py", "backslash=path\\\\to\\\\file", 'quote=She said "Hello"' }
       local template_path, runtime_vars = utils.parse_args(args)
 
       assert.equals("template.py", template_path)
@@ -165,7 +194,7 @@ describe("boil.utils", function()
     end)
 
     it("should handle complex quoted values with special chars", function()
-      local args = { "template.py", 'json={"key": "value with spaces"}', "regex='\\d+\\.\\d+'" }
+      local args = { "template.py", 'json={"key": "value with spaces"}', "regex='\\\\d+\\\\.\\\\d+'" }
       local template_path, runtime_vars = utils.parse_args(args)
 
       assert.equals("template.py", template_path)

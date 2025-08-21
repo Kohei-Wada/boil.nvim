@@ -2,6 +2,15 @@ local M = {}
 
 require "boil.types"
 
+---Safely escape replacement string for string.gsub
+---@param str string String to escape
+---@return string escaped_string Safe string for gsub replacement
+local function escape_replacement(str)
+  -- Escape % characters in replacement string to prevent gsub interpretation
+  -- as capture group references
+  return (str:gsub("%%", "%%%%"))
+end
+
 ---Expand variables in template content
 ---@param template_content string Template content with {{variable}} placeholders
 ---@param config Config Global configuration
@@ -39,7 +48,7 @@ M.expand = function(template_content, config, template_config, runtime_variables
       replacement = tostring(value)
     end
 
-    result = result:gsub(pattern, replacement)
+    result = result:gsub(pattern, escape_replacement(replacement))
   end
 
   -- Check for unexpanded variables

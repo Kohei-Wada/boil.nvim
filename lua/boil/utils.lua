@@ -1,5 +1,19 @@
 local M = {}
 
+---Unescape common escape sequences in string values
+---@param str string String that may contain escape sequences
+---@return string unescaped_string String with escape sequences converted
+local function unescape_string(str)
+  return str:gsub("\\(.)", {
+    n = "\n", -- \n -> newline
+    t = "\t", -- \t -> tab
+    r = "\r", -- \r -> carriage return
+    ["\\"] = "\\", -- \\ -> \
+    ['"'] = '"', -- \" -> "
+    ["'"] = "'", -- \' -> '
+  })
+end
+
 ---Parse command arguments to extract template path and runtime variables
 ---@param args_list string[] List of command arguments
 ---@return string|nil template_path Template path if specified
@@ -16,6 +30,8 @@ M.parse_args = function(args_list)
       if value:match '^".*"$' or value:match "^'.*'$" then
         value = value:sub(2, -2)
       end
+      -- Unescape common escape sequences
+      value = unescape_string(value)
       runtime_vars[key] = value
     else
       -- First non-variable argument is template path
