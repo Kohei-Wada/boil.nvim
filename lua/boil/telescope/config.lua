@@ -22,7 +22,7 @@ M.merge_config = function(opts)
   opts = opts or {}
 
   -- Extract runtime variables before merging configs to avoid conflicts
-  local runtime_vars = opts.runtime_vars
+  local runtime_vars = opts.runtime_vars or {}
   opts.runtime_vars = nil
 
   -- Merge configs: default -> extension -> runtime
