@@ -1,4 +1,4 @@
-# boil.nvim
+# 🔥 boil.nvim
 
 A Neovim plugin for intentional boilerplate template insertion with variable expansion and runtime variables.
 
