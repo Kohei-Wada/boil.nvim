@@ -21,11 +21,11 @@ return telescope.register_extension {
         end
       end
 
-      local opts = {}
-      opts.runtime_vars = runtime_vars
+      local opts = {
+        runtime_vars = runtime_vars,
+      }
 
       local merged_opts = config.merge_config(opts)
-      merged_opts.runtime_vars = runtime_vars
       picker.create_picker(merged_opts)
     end,
   },

@@ -2,12 +2,15 @@ local M = {}
 
 require "boil.types"
 
+-- Default filter function that always returns true
+local default_filter = function(template)
+  return true
+end
+
 ---@type Config
 M.defaults = {
   templates = {},
-  filter = function(template)
-    return true
-  end,
+  filter = default_filter,
   variables = {
     __filename__ = function()
       local filename = vim.fn.expand "%:t"
@@ -52,9 +55,7 @@ M.setup = function(user_config)
 
       -- Add default filter if not provided
       if not template_config.filter then
-        template_config.filter = function(template)
-          return true
-        end
+        template_config.filter = default_filter
       end
     end
   end
