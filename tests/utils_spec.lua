@@ -223,5 +223,32 @@ describe("boil.utils", function()
       assert.equals('{"key": "value with spaces"}', runtime_vars.json)
       assert.equals("\\d+\\.\\d+", runtime_vars.regex)
     end)
+
+    -- Edge case tests for Copilot feedback fixes
+    it("should ignore arguments with empty keys", function()
+      local args = { "template.py", "=value", "=another", "valid=good" }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      assert.is_nil(runtime_vars[""])
+      assert.equals("good", runtime_vars.valid)
+      -- Should have only one valid variable
+      local count = 0
+      for _ in pairs(runtime_vars) do
+        count = count + 1
+      end
+      assert.equals(1, count)
+    end)
+
+    it("should preserve unknown escape sequences", function()
+      local args = { "template.py", "unknown=\\b\\f\\v\\x41", "known=\\n\\t" }
+      local template_path, runtime_vars = utils.parse_args(args)
+
+      assert.equals("template.py", template_path)
+      -- Unknown escape sequences should be preserved
+      assert.equals("\\b\\f\\v\\x41", runtime_vars.unknown)
+      -- Known escape sequences should be converted
+      assert.equals("\n\t", runtime_vars.known)
+    end)
   end)
 end)
