@@ -45,7 +45,7 @@ describe("boil.telescope.config", function()
       config.setup(user_config)
 
       -- Test by calling merge_config which should use the stored config
-      local merged_opts, _ = config.merge_config {}
+      local merged_opts = config.merge_config {}
       assert.equals("Custom Templates", merged_opts.prompt_title)
       assert.equals("Custom Preview", merged_opts.previewer_title)
     end)
@@ -56,14 +56,14 @@ describe("boil.telescope.config", function()
       end)
 
       -- Should still use default config
-      local merged_opts, _ = config.merge_config {}
+      local merged_opts = config.merge_config {}
       assert.equals("Boil Templates", merged_opts.prompt_title)
     end)
 
     it("should handle empty user config", function()
       config.setup {}
 
-      local merged_opts, _ = config.merge_config {}
+      local merged_opts = config.merge_config {}
       assert.equals("Boil Templates", merged_opts.prompt_title)
       assert.equals("Template Preview", merged_opts.previewer_title)
     end)
@@ -71,34 +71,30 @@ describe("boil.telescope.config", function()
 
   describe("merge_config", function()
     it("should return default config when no options provided", function()
-      local merged_opts, runtime_vars = config.merge_config()
+      local merged_opts = config.merge_config()
 
       assert.equals("Boil Templates", merged_opts.prompt_title)
       assert.equals("Template Preview", merged_opts.previewer_title)
-      assert.is_same({}, runtime_vars)
     end)
 
     it("should return default config with empty options", function()
-      local merged_opts, runtime_vars = config.merge_config {}
+      local merged_opts = config.merge_config {}
 
       assert.equals("Boil Templates", merged_opts.prompt_title)
       assert.equals("Template Preview", merged_opts.previewer_title)
-      assert.is_same({}, runtime_vars)
     end)
 
-    it("should extract runtime_vars from options", function()
+    it("should preserve runtime_vars in merged options", function()
       local test_runtime_vars = { author = "Test", project = "TestProject" }
       local opts = {
         prompt_title = "Custom Title",
         runtime_vars = test_runtime_vars,
       }
 
-      local merged_opts, runtime_vars = config.merge_config(opts)
+      local merged_opts = config.merge_config(opts)
 
-      -- runtime_vars should be extracted
-      assert.is_same(test_runtime_vars, runtime_vars)
-      -- runtime_vars should be removed from merged_opts
-      assert.is_nil(merged_opts.runtime_vars)
+      -- runtime_vars should be preserved in merged_opts
+      assert.is_same(test_runtime_vars, merged_opts.runtime_vars)
       assert.equals("Custom Title", merged_opts.prompt_title)
     end)
 
@@ -108,9 +104,8 @@ describe("boil.telescope.config", function()
         runtime_vars = nil,
       }
 
-      local merged_opts, runtime_vars = config.merge_config(opts)
+      local merged_opts = config.merge_config(opts)
 
-      assert.is_same({}, runtime_vars) -- nil is converted to empty table
       assert.is_nil(merged_opts.runtime_vars)
       assert.equals("Custom Title", merged_opts.prompt_title)
     end)
@@ -129,7 +124,7 @@ describe("boil.telescope.config", function()
         runtime_only = "runtime_value",
       }
 
-      local merged_opts, _ = config.merge_config(opts)
+      local merged_opts = config.merge_config(opts)
 
       -- Runtime should override extension and default
       assert.equals("Runtime Title", merged_opts.prompt_title)
@@ -147,7 +142,7 @@ describe("boil.telescope.config", function()
           prompt_title = "Test Title",
         }
 
-        local merged_opts, _ = config.merge_config(opts)
+        local merged_opts = config.merge_config(opts)
 
         assert.is_true(merged_opts.ivy_theme_applied)
         assert.equals("Test Title", merged_opts.prompt_title)
@@ -159,7 +154,7 @@ describe("boil.telescope.config", function()
           theme = "dropdown",
         }
 
-        local merged_opts, _ = config.merge_config(opts)
+        local merged_opts = config.merge_config(opts)
 
         assert.is_true(merged_opts.dropdown_theme_applied)
         assert.is_nil(merged_opts.theme)
@@ -170,7 +165,7 @@ describe("boil.telescope.config", function()
           theme = "cursor",
         }
 
-        local merged_opts, _ = config.merge_config(opts)
+        local merged_opts = config.merge_config(opts)
 
         assert.is_true(merged_opts.cursor_theme_applied)
         assert.is_nil(merged_opts.theme)
@@ -182,7 +177,7 @@ describe("boil.telescope.config", function()
           prompt_title = "Test Title",
         }
 
-        local merged_opts, _ = config.merge_config(opts)
+        local merged_opts = config.merge_config(opts)
 
         -- Should not crash and should preserve other options
         assert.equals("Test Title", merged_opts.prompt_title)
@@ -199,7 +194,7 @@ describe("boil.telescope.config", function()
           prompt_title = "Test Title",
         }
 
-        local merged_opts, _ = config.merge_config(opts)
+        local merged_opts = config.merge_config(opts)
 
         assert.equals("Test Title", merged_opts.prompt_title)
         assert.is_nil(merged_opts.theme)
@@ -218,14 +213,13 @@ describe("boil.telescope.config", function()
         },
       }
 
-      local merged_opts, runtime_vars = config.merge_config(opts)
+      local merged_opts = config.merge_config(opts)
 
       assert.equals("Custom Title", merged_opts.prompt_title)
       assert.equals("Template Preview", merged_opts.previewer_title) -- from default
       assert.equals("custom_value", merged_opts.custom_option)
       assert.equals("deep_value", merged_opts.nested.deep.value)
-      assert.is_same({ author = "Test" }, runtime_vars)
-      assert.is_nil(merged_opts.runtime_vars)
+      assert.is_same({ author = "Test" }, merged_opts.runtime_vars)
     end)
   end)
 
@@ -245,11 +239,10 @@ describe("boil.telescope.config", function()
         runtime_setting = "runtime_value",
       }
 
-      local merged_opts, runtime_vars = config.merge_config(opts)
+      local merged_opts = config.merge_config(opts)
 
-      -- Check runtime vars extraction
-      assert.is_same({ author = "TestAuthor", project = "TestProject" }, runtime_vars)
-      assert.is_nil(merged_opts.runtime_vars)
+      -- Check runtime vars preserved
+      assert.is_same({ author = "TestAuthor", project = "TestProject" }, merged_opts.runtime_vars)
 
       -- Check config merge priority
       assert.equals("Runtime Title", merged_opts.prompt_title) -- runtime wins

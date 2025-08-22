@@ -5,19 +5,6 @@ local config = require "boil.telescope.config"
 local picker = require "boil.telescope.picker"
 local utils = require "boil.utils"
 
----Main picker function with runtime variables support
----@param opts table Picker options including runtime_vars
-local function boil_picker(opts)
-  opts = opts or {}
-
-  -- Merge configuration
-  local merged_opts, runtime_vars = config.merge_config(opts)
-  merged_opts.runtime_vars = runtime_vars
-
-  -- Create and display picker
-  picker.create_picker(merged_opts)
-end
-
 return telescope.register_extension {
   setup = function(user_ext_config, telescope_config)
     -- Setup configuration module
@@ -36,7 +23,10 @@ return telescope.register_extension {
 
       local opts = {}
       opts.runtime_vars = runtime_vars
-      boil_picker(opts)
+
+      local merged_opts = config.merge_config(opts)
+      merged_opts.runtime_vars = runtime_vars
+      picker.create_picker(merged_opts)
     end,
   },
 }

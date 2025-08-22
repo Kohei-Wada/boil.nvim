@@ -20,12 +20,6 @@ end
 ---@return table merged_opts Merged configuration options
 M.merge_config = function(opts)
   opts = opts or {}
-
-  -- Extract runtime variables before merging configs to avoid conflicts
-  local runtime_vars = opts.runtime_vars or {}
-  opts.runtime_vars = nil
-
-  -- Merge configs: default -> extension -> runtime
   opts = vim.tbl_deep_extend("force", M.default_config, ext_config, opts)
 
   -- Handle theme string (similar to telescope-file-browser)
@@ -38,7 +32,7 @@ M.merge_config = function(opts)
     opts.theme = nil
   end
 
-  return opts, runtime_vars
+  return opts
 end
 
 return M
