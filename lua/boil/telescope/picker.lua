@@ -54,8 +54,6 @@ local function create_mappings(runtime_vars)
       actions.close(prompt_bufnr)
       local selection = action_state.get_selected_entry()
       if selection then
-        -- Debug: Print runtime_vars before calling insert_template
-        print("Telescope runtime_vars:", vim.inspect(runtime_vars))
         boil.insert_template(selection.value, runtime_vars)
       end
     end)
