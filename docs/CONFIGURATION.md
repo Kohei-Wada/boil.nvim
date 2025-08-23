@@ -16,6 +16,11 @@ This document provides comprehensive configuration examples and explanations for
 ```lua
 require('boil').setup({
   templates = {
+    -- Try the examples directory first for immediate use
+    {
+      name = "examples",
+      path = vim.fn.stdpath("data") .. "/lazy/boil.nvim/examples/templates",
+    },
     -- Template directories with priority order
     {
       name = "personal",
@@ -59,6 +64,10 @@ Template directories are processed in the order they are defined. Each directory
 
 ```lua
 templates = {
+  {
+    name = "examples",           -- Try examples first
+    path = vim.fn.stdpath("data") .. "/lazy/boil.nvim/examples/templates",
+  },
   {
     name = "personal",           -- Display name (optional)
     path = "~/.config/templates", -- Path to template directory
@@ -109,6 +118,7 @@ Built-in variables use the `__` prefix to distinguish them from user-defined var
 - `{{__basename__}}` - Current file name without extension
 - `{{__date__}}` - Current date (YYYY-MM-DD)
 - `{{__author__}}` - Author name from configuration
+- `{{__selection__}}` - Current visual selection or current line content (see [Advanced Usage](TEMPLATES.md#advanced-__selection__-usage))
 
 ### Custom Variables
 
@@ -205,6 +215,14 @@ template = {
 
 ```lua
 {
+  name = "examples",
+  path = vim.fn.stdpath("data") .. "/lazy/boil.nvim/examples/templates",
+  filter = function(template)
+    -- Only show bash templates from examples
+    return template.path:match("/bash/")
+  end
+},
+{
   name = "team-templates",
   path = "~/work/shared-templates",  -- Shared team repository
   filter = function(template)
@@ -236,17 +254,22 @@ end
 
 ```lua
 filter = function(template)
-  -- Language-specific filtering
+  -- Language-specific filtering with examples directory
   local ft = vim.bo.filetype
   if ft == "python" then
-    return template.path:match("%.py$")
-  elseif ft == "lua" then
-    return template.path:match("%.lua$")
+    return template.path:match("%.py$") or template.path:match("/python/")
+  elseif ft == "bash" then
+    return template.path:match("%.sh$") or template.path:match("/bash/")
+  elseif ft == "javascript" then
+    return template.path:match("%.jsx?$") or template.path:match("/javascript/")
   end
 
-  -- Project-specific filtering
-  local project_type = vim.fn.expand("%:p"):match("frontend") and "frontend" or "backend"
-  return template.path:match(project_type)
+  -- Show only selection-based templates when in visual mode
+  if vim.fn.mode():match("[vV]") then
+    return template.path:match("/bash/") or template.path:match("try%-catch")
+  end
+
+  return true
 end
 ```
 
@@ -269,6 +292,8 @@ require('telescope').setup({
 -- Load the extension
 require('telescope').load_extension('boil')
 ```
+
+**Known Issue**: Telescope integration with `{{__selection__}}` variable is currently unstable. Visual selection state may not be properly detected when using Telescope picker. Use the `:Boil` command directly for selection-based templates.
 
 ### Custom Telescope Configuration
 
