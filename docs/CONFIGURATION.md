@@ -16,6 +16,11 @@ This document provides comprehensive configuration examples and explanations for
 ```lua
 require('boil').setup({
   templates = {
+    -- Try the examples directory first for immediate use
+    {
+      name = "examples",
+      path = vim.fn.stdpath("data") .. "/lazy/boil.nvim/examples/templates",
+    },
     -- Template directories with priority order
     {
       name = "personal",
@@ -60,6 +65,10 @@ Template directories are processed in the order they are defined. Each directory
 ```lua
 templates = {
   {
+    name = "examples",           -- Try examples first
+    path = vim.fn.stdpath("data") .. "/lazy/boil.nvim/examples/templates",
+  },
+  {
     name = "personal",           -- Display name (optional)
     path = "~/.config/templates", -- Path to template directory
     variables = {                -- Directory-specific variables
@@ -88,18 +97,105 @@ Variables are processed with the following priority (highest to lowest):
 3. **Global variables** (defined in main config)
 4. **Built-in variables**
 
-### Design Philosophy: Less is More
+### Design Philosophy: Programmable Simplicity
 
-**boil.nvim embraces the "Less is More" philosophy** - achieving maximum flexibility through minimal complexity. The template engine remains compact and focused, providing unlimited extensibility by delegating complex logic to Lua configuration rather than building it into the engine itself.
+**boil.nvim demonstrates that the most powerful tools often have the simplest cores.** By limiting the template engine to pure string substitution (`{{variable}}`), we unlock unlimited extensibility through Lua programming.
 
-This minimalist approach:
-- Maintains simplicity and reliability (fewer bugs in less code)
-- Leverages Lua's full programming capabilities instead of reinventing them
-- Provides seamless integration with Neovim's APIs and ecosystem
-- Keeps debugging straightforward in a single language environment
-- Allows users to bring their own complexity only when needed
+#### The Revolutionary Insight
 
-**The template engine intentionally does just one thing: variable substitution** via `{{variable}}` placeholders. Everything else - conditionals, loops, complex transformations - belongs in your Lua configuration where you have the full power of the language at your disposal.
+Traditional template engines try to anticipate every possible use case:
+
+```javascript
+// Traditional approach: build features into the engine
+if (condition) { /* engine handles conditionals */ }
+for (item in items) { /* engine handles loops */ }
+include "other-template" /* engine handles includes */
+```
+
+boil.nvim takes the opposite approach:
+
+```lua
+-- Simple engine: just string replacement
+content:gsub("{{" .. key .. "}}", replacement)
+
+-- Complex logic: delegated to programming
+variables = {
+  conditional_content = function()
+    if some_condition() then
+      return "content A"
+    else
+      return "content B"
+    end
+  end,
+
+  loop_content = function()
+    local items = get_items()
+    local result = {}
+    for _, item in ipairs(items) do
+      table.insert(result, process_item(item))
+    end
+    return table.concat(result, "\n")
+  end,
+
+  included_content = function()
+    return vim.fn.readfile("other-template.txt")
+  end
+}
+```
+
+#### Why This Approach Wins
+
+1. **Infinite Extensibility**: If you can program it in Lua, you can use it in templates
+2. **No Engine Limitations**: Never constrained by what the template engine "supports"
+3. **Full Programming Power**: Variables, functions, APIs, file system, network - everything accessible
+4. **Maintainability**: Complex logic lives in proper code, not template syntax
+5. **Debuggability**: Use standard Lua debugging tools instead of template-specific ones
+6. **Performance**: No parsing overhead for complex template syntax
+
+#### Real-World Power Examples
+
+```lua
+variables = {
+  -- Dynamic API integration
+  github_issues = function()
+    local cmd = "gh issue list --json number,title --limit 5"
+    local result = vim.fn.system(cmd)
+    local issues = vim.fn.json_decode(result)
+    local lines = {}
+    for _, issue in ipairs(issues) do
+      table.insert(lines, string.format("- #%d %s", issue.number, issue.title))
+    end
+    return table.concat(lines, "\n")
+  end,
+
+  -- Intelligent code analysis
+  class_dependencies = function()
+    local buffer_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    local imports = {}
+    for _, line in ipairs(buffer_lines) do
+      local import = line:match("^import%s+(.+)")
+      if import then
+        table.insert(imports, import)
+      end
+    end
+    return table.concat(imports, "\n")
+  end,
+
+  -- Interactive template generation
+  component_props = function()
+    local props = {}
+    while true do
+      local prop = vim.fn.input("Add prop (empty to finish): ")
+      if prop == "" then break end
+      local type = vim.fn.input("Type for " .. prop .. ": ")
+      table.insert(props, prop .. ": " .. type)
+    end
+    return table.concat(props, ",\n  ")
+  end
+}
+```
+
+**The template engine intentionally does just one thing: variable substitution.** Everything else - conditionals, loops, API calls, user interaction, file system operations, external integrations - belongs in your Lua configuration where you have unlimited power and proper tooling.
 
 ### Built-in Variables
 
@@ -109,6 +205,7 @@ Built-in variables use the `__` prefix to distinguish them from user-defined var
 - `{{__basename__}}` - Current file name without extension
 - `{{__date__}}` - Current date (YYYY-MM-DD)
 - `{{__author__}}` - Author name from configuration
+- `{{__selection__}}` - Current visual selection or current line content (see [Advanced Usage](TEMPLATES.md#advanced-__selection__-usage))
 
 ### Custom Variables
 
@@ -205,6 +302,14 @@ template = {
 
 ```lua
 {
+  name = "examples",
+  path = vim.fn.stdpath("data") .. "/lazy/boil.nvim/examples/templates",
+  filter = function(template)
+    -- Only show bash templates from examples
+    return template.path:match("/bash/")
+  end
+},
+{
   name = "team-templates",
   path = "~/work/shared-templates",  -- Shared team repository
   filter = function(template)
@@ -236,17 +341,22 @@ end
 
 ```lua
 filter = function(template)
-  -- Language-specific filtering
+  -- Language-specific filtering with examples directory
   local ft = vim.bo.filetype
   if ft == "python" then
-    return template.path:match("%.py$")
-  elseif ft == "lua" then
-    return template.path:match("%.lua$")
+    return template.path:match("%.py$") or template.path:match("/python/")
+  elseif ft == "bash" then
+    return template.path:match("%.sh$") or template.path:match("/bash/")
+  elseif ft == "javascript" then
+    return template.path:match("%.jsx?$") or template.path:match("/javascript/")
   end
 
-  -- Project-specific filtering
-  local project_type = vim.fn.expand("%:p"):match("frontend") and "frontend" or "backend"
-  return template.path:match(project_type)
+  -- Show only selection-based templates when in visual mode
+  if vim.fn.mode():match("[vV]") then
+    return template.path:match("/bash/") or template.path:match("try%-catch")
+  end
+
+  return true
 end
 ```
 
@@ -269,6 +379,8 @@ require('telescope').setup({
 -- Load the extension
 require('telescope').load_extension('boil')
 ```
+
+**Known Issue**: Telescope integration with `{{__selection__}}` variable is currently unstable. Visual selection state may not be properly detected when using Telescope picker. Use the `:Boil` command directly for selection-based templates.
 
 ### Custom Telescope Configuration
 

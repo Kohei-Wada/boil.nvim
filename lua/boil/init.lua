@@ -1,11 +1,27 @@
 local M = {}
 local config = require "boil.config"
 local templates = require "boil.templates"
-local expander = require "boil.expander"
+local inserter = require "boil.inserter"
 local logger = require "boil.logger"
 local utils = require "boil.utils"
 
 require "boil.types"
+
+---Merge variables from different sources according to priority
+---@param cfg Config Global configuration
+---@param template_config? TemplateConfig Template-specific configuration
+---@param runtime_variables? table<string, string> Runtime variables with highest priority
+---@return table<string, any> merged_variables Variables merged with proper priority
+local function merge_variables(cfg, template_config, runtime_variables)
+  local variables = vim.tbl_extend("force", {}, cfg.variables or {})
+  if template_config and template_config.variables then
+    variables = vim.tbl_extend("force", variables, template_config.variables)
+  end
+  if runtime_variables then
+    variables = vim.tbl_extend("force", variables, runtime_variables)
+  end
+  return variables
+end
 
 ---Setup boil.nvim plugin
 ---@param user_config? Config User configuration
@@ -23,6 +39,7 @@ M.setup = function(user_config)
     M.insert_template(template_path, runtime_vars)
   end, {
     nargs = "*",
+    range = true,
     complete = function()
       local template_list = templates.find_templates(config.get())
       local paths = {}
@@ -42,30 +59,9 @@ M.insert_template = function(template_name, runtime_variables)
   local template_list = templates.find_templates(cfg)
 
   local function insert_content(template)
-    local content = templates.load_template(template.path)
-    if content then
-      local expanded, err = expander.expand(content, cfg, template.config, runtime_variables)
-      if err then
-        logger.warn("Template expansion warnings:\n" .. err)
-      end
-      if not expanded then
-        logger.error("Failed to expand template: " .. template.path)
-        return
-      end
-
-      local lines = vim.split(expanded, "\n", { plain = true })
-      local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-
-      -- If current line is empty, replace it; otherwise insert after current line
-      local current_line = vim.api.nvim_buf_get_lines(0, row - 1, row, false)[1]
-      if current_line == "" then
-        vim.api.nvim_buf_set_lines(0, row - 1, row, false, lines)
-      else
-        vim.api.nvim_buf_set_lines(0, row, row, false, lines)
-      end
-
-      logger.info("Template inserted: " .. templates.get_display_name(template))
-    end
+    -- Merge variables before passing to inserter
+    local merged_vars = merge_variables(cfg, template.config, runtime_variables)
+    inserter.insert_template_content(template, merged_vars)
   end
 
   if template_name and template_name ~= "" then

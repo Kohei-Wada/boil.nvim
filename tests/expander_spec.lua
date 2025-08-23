@@ -6,6 +6,18 @@ describe("boil.expander", function()
     expander = require "boil.expander"
   end)
 
+  -- Helper function to merge variables like init.lua does
+  local function merge_variables(cfg, template_config, runtime_variables)
+    local variables = vim.tbl_extend("force", {}, cfg.variables or {})
+    if template_config and template_config.variables then
+      variables = vim.tbl_extend("force", variables, template_config.variables)
+    end
+    if runtime_variables then
+      variables = vim.tbl_extend("force", variables, runtime_variables)
+    end
+    return variables
+  end
+
   describe("expand", function()
     it("should expand basic variables", function()
       local template = "File: {{__filename__}}\nBase: {{__basename__}}\nDate: {{__date__}}\nAuthor: {{__author__}}"
@@ -24,7 +36,8 @@ describe("boil.expander", function()
         },
       }
 
-      local result = expander.expand(template, config)
+      local variables = merge_variables(config, nil, nil)
+      local result = expander.expand(template, variables)
 
       assert.is_string(result)
       assert.is_not_nil(result:match "File: test%.lua")
@@ -47,7 +60,8 @@ describe("boil.expander", function()
         },
       }
 
-      local result = expander.expand(template, config, template_config)
+      local variables = merge_variables(config, template_config, nil)
+      local result = expander.expand(template, variables)
 
       assert.is_not_nil(result:match "Author: Template Author")
       assert.is_not_nil(result:match "Company: Global Company")
@@ -63,7 +77,8 @@ describe("boil.expander", function()
         },
       }
 
-      local result = expander.expand(template, config)
+      local variables = merge_variables(config, nil, nil)
+      local result = expander.expand(template, variables)
 
       assert.is_not_nil(result:match "Project: MyProject")
     end)
@@ -76,7 +91,8 @@ describe("boil.expander", function()
         },
       }
 
-      local result = expander.expand(template, config, nil)
+      local variables = merge_variables(config, nil, nil)
+      local result = expander.expand(template, variables)
 
       assert.is_not_nil(result:match "Author: Global Author")
     end)
@@ -96,7 +112,8 @@ describe("boil.expander", function()
         },
       }
 
-      local result = expander.expand(template, config, template_config)
+      local variables = merge_variables(config, template_config, nil)
+      local result = expander.expand(template, variables)
 
       assert.is_not_nil(result:match "A: global_a")
       assert.is_not_nil(result:match "B: template_b")
@@ -114,7 +131,8 @@ describe("boil.expander", function()
         },
       }
 
-      local result, err = expander.expand(template, config)
+      local variables = merge_variables(config, nil, nil)
+      local result, err = expander.expand(template, variables)
 
       assert.is_string(result)
       assert.is_string(err)
@@ -131,7 +149,8 @@ describe("boil.expander", function()
         },
       }
 
-      local result, err = expander.expand(template, config)
+      local variables = merge_variables(config, nil, nil)
+      local result, err = expander.expand(template, variables)
 
       assert.is_string(result)
       assert.is_string(err)
@@ -153,7 +172,8 @@ describe("boil.expander", function()
         },
       }
 
-      local result = expander.expand(template, config)
+      local variables = merge_variables(config, nil, nil)
+      local result = expander.expand(template, variables)
 
       assert.is_string(result)
       assert.equals("Value: ", result)
@@ -167,7 +187,8 @@ describe("boil.expander", function()
         },
       }
 
-      local result, err = expander.expand(template, config)
+      local variables = merge_variables(config, nil, nil)
+      local result, err = expander.expand(template, variables)
 
       assert.is_string(result)
       assert.is_nil(err)
@@ -194,7 +215,8 @@ describe("boil.expander", function()
         author = "Runtime Author",
       }
 
-      local result = expander.expand(template, config, template_config, runtime_variables)
+      local variables = merge_variables(config, template_config, runtime_variables)
+      local result = expander.expand(template, variables)
 
       assert.is_not_nil(result:match "Author: Runtime Author") -- Runtime wins
       assert.is_not_nil(result:match "Project: Template Project") -- Template wins over global
@@ -213,7 +235,8 @@ describe("boil.expander", function()
         email = "runtime@example.com",
       }
 
-      local result = expander.expand(template, config, nil, runtime_variables)
+      local variables = merge_variables(config, nil, runtime_variables)
+      local result = expander.expand(template, variables)
 
       assert.is_not_nil(result:match "Name: Global Name")
       assert.is_not_nil(result:match "Email: runtime@example%.com")
@@ -227,7 +250,8 @@ describe("boil.expander", function()
         },
       }
 
-      local result = expander.expand(template, config, nil, nil)
+      local variables = merge_variables(config, nil, nil)
+      local result = expander.expand(template, variables)
 
       assert.is_not_nil(result:match "Author: Global Author")
     end)
@@ -241,7 +265,8 @@ describe("boil.expander", function()
       }
       local runtime_variables = {}
 
-      local result = expander.expand(template, config, nil, runtime_variables)
+      local variables = merge_variables(config, nil, runtime_variables)
+      local result = expander.expand(template, variables)
 
       assert.is_not_nil(result:match "Author: Global Author")
     end)
@@ -257,7 +282,8 @@ describe("boil.expander", function()
         role = "Developer",
       }
 
-      local result = expander.expand(template, config, nil, runtime_variables)
+      local variables = merge_variables(config, nil, runtime_variables)
+      local result = expander.expand(template, variables)
 
       assert.is_not_nil(result:match "Name: John")
       assert.is_not_nil(result:match "Role: Developer")
@@ -283,7 +309,8 @@ describe("boil.expander", function()
         c = "runtime_c",
       }
 
-      local result = expander.expand(template, config, template_config, runtime_variables)
+      local variables = merge_variables(config, template_config, runtime_variables)
+      local result = expander.expand(template, variables)
 
       assert.is_not_nil(result:match "A: global_a") -- Global only
       assert.is_not_nil(result:match "B: template_b") -- Template over global
@@ -303,7 +330,8 @@ describe("boil.expander", function()
         code = "function test() {\n  return true;\n}",
       }
 
-      local result = expander.expand(template, config, nil, runtime_variables)
+      local variables = merge_variables(config, nil, runtime_variables)
+      local result = expander.expand(template, variables)
 
       -- Check that newlines are preserved
       assert.is_not_nil(result:match "Description: Multi%-line\ndescription\nwith breaks")
@@ -318,7 +346,8 @@ describe("boil.expander", function()
         mixed = " \t\n mixed \r\n content \t ",
       }
 
-      local result = expander.expand(template, { variables = {} }, nil, runtime_variables)
+      local variables = merge_variables({ variables = {} }, nil, runtime_variables)
+      local result = expander.expand(template, variables)
 
       -- Verify whitespace is preserved exactly
       assert.is_not_nil(result:match "Spaced:   has   spaces  ")
@@ -333,7 +362,8 @@ describe("boil.expander", function()
         regex = "^[a-zA-Z]+$",
       }
 
-      local result = expander.expand(template, { variables = {} }, nil, runtime_variables)
+      local variables = merge_variables({ variables = {} }, nil, runtime_variables)
+      local result = expander.expand(template, variables)
 
       -- These should work correctly despite containing regex special chars
       assert.is_not_nil(result:match "Pattern: %*%.js files")
@@ -348,7 +378,8 @@ describe("boil.expander", function()
         message = "Result: 50% success rate\n%s will be processed next",
       }
 
-      local result = expander.expand(template, { variables = {} }, nil, runtime_variables)
+      local variables = merge_variables({ variables = {} }, nil, runtime_variables)
+      local result = expander.expand(template, variables)
 
       -- Verify percent characters are handled correctly
       assert.is_not_nil(result:match "Progress: Loading: 100%% complete")
@@ -363,7 +394,8 @@ describe("boil.expander", function()
         sql = "SELECT *\nFROM users\nWHERE name LIKE '%john%'\n  AND status = 'active';",
       }
 
-      local result = expander.expand(template, { variables = {} }, nil, runtime_variables)
+      local variables = merge_variables({ variables = {} }, nil, runtime_variables)
+      local result = expander.expand(template, variables)
 
       -- Check that complex multiline content with % chars is preserved
       assert.is_not_nil(result:match "Script: #!/bin/bash")

@@ -5,9 +5,9 @@ This document covers everything you need to know about creating and organizing t
 ## Table of Contents
 
 - [Template Basics](#template-basics)
-- [Directory Structure](#directory-structure)
 - [Variable Usage](#variable-usage)
 - [Runtime Variables](#runtime-variables)
+- [Advanced `__selection__` Usage](#advanced-__selection__-usage)
 - [Template Examples](#template-examples)
 
 ## Template Basics
@@ -16,21 +16,7 @@ Templates are simple text files with `{{variable}}` placeholders that get replac
 
 ### Simple Template Example
 
-**File: `python/basic.py`**
-```python
-#!/usr/bin/env python3
-"""
-{{__filename__}}
-Author: {{__author__}}
-Date: {{__date__}}
-"""
-
-def main():
-    pass
-
-if __name__ == "__main__":
-    main()
-```
+Templates use `{{variable}}` placeholders that get replaced during insertion. See [`examples/templates/python/basic.py`](../examples/templates/python/basic.py) for a complete example.
 
 ### Variable Syntax
 
@@ -39,30 +25,7 @@ if __name__ == "__main__":
 - No spaces inside braces: `{{name}}` ✓, `{{ name }}` ✗
 - Built-in variables start with `__`: `{{__filename__}}`
 
-## Directory Structure
-
-Organize templates in logical directories for easy discovery:
-
-```
-templates/
-├── python/
-│   ├── basic.py
-│   ├── class.py
-│   ├── script.py
-│   └── test.py
-├── javascript/
-│   ├── react-component.jsx
-│   ├── node-script.js
-│   └── express-route.js
-├── lua/
-│   ├── module.lua
-│   ├── plugin.lua
-│   └── spec.lua
-└── docs/
-    ├── readme.md
-    ├── api.md
-    └── changelog.md
-```
+Templates can be organized in any directory structure you prefer. The plugin recursively scans all configured directories and discovers templates automatically. See the [`examples/templates/`](../examples/templates/) directory for one possible organization approach.
 
 ## Variable Usage
 
@@ -72,6 +35,7 @@ templates/
 - `{{__basename__}}` - Filename without extension (`app`)
 - `{{__date__}}` - Current date in YYYY-MM-DD format
 - `{{__author__}}` - Author from configuration
+- `{{__selection__}}` - Current visual selection or current line content (see [Advanced Usage](#advanced-__selection__-usage))
 
 ### Custom Variables
 
@@ -108,7 +72,7 @@ The `:Boil` command uses absolute template paths and supports runtime variables 
 :Boil /home/user/.config/nvim/templates/react/component.jsx component=UserProfile author=Jane team=Frontend
 
 " With quotes for values containing spaces
-:Boil /home/user/.config/nvim/templates/docs/readme.md project="My Amazing App" description="A revolutionary tool"
+:Boil /home/user/.config/nvim/templates/docs/readme.md project="My Amazing App" description="A useful tool"
 
 " Escape sequences for special characters
 :Boil /home/user/.config/nvim/templates/config/database.py database="localhost:5432" connection="user=admin\\npass=secret"
@@ -162,83 +126,180 @@ Example:
 
 ### Practical Examples
 
-#### Dynamic Project Setup
-```vim
-:Boil /path/to/templates/python/project.py project=WebAPI author=TeamLead version=1.0
+See the [Template Examples](#template-examples) section for complete usage examples with the provided example templates.
+
+## Example: Selection-Based Templates
+
+The `{{__selection__}}` variable demonstrates the power of boil.nvim's programmable approach. What might require engine-level changes in traditional template systems is simply one Lua function in boil.nvim.
+
+This example shows how a simple core engine enables sophisticated functionality through programming rather than built-in features.
+
+### Shell Integration
+
+This workflow can enhance command-line productivity:
+
+1. **Start with existing command**: Type or recall a shell command
+2. **Open editor**: Use your shell's editor integration (e.g., `fc`, `Ctrl-x Ctrl-e`, or `Alt-e`)
+3. **Visual select**: Select the command or part of it
+4. **Apply template**: Use `:Boil` to wrap selection with error handling, logging, or functions
+
+#### Example Workflow
+
+```bash
+# 1. Original command in your shell
+curl -X POST https://api.example.com/users -d '{"name": "John"}'
+
+# 2. Open editor (fc, Ctrl-x Ctrl-e, Alt-e, etc.)
+# 3. Visual select the curl command
+# 4. :Boil examples/templates/bash/error-handling.sh
+
+# 5. Result: Robust script with error handling
+#!/bin/bash
+set -euo pipefail
+
+main() {
+  curl -X POST https://api.example.com/users -d '{"name": "John"}' || {
+    echo "Error: API call failed" >&2
+    echo "Check network connection and API endpoint" >&2
+    exit 1
+  }
+}
+
+main "$@"
 ```
 
-#### Component Generation
+### Why This Approach Is Different
+
+Unlike snippets which require pre-planning, `__selection__` enables **quick code modification**:
+
+| Traditional Snippets | `__selection__` Method |
+|---------------------|------------------------|
+| Plan → Write snippet → Code | Code → Select → Modify |
+| Static placeholders | Dynamic existing content |
+| Editor-only workflow | Command-line integrated |
+| New code creation | Existing code enhancement |
+
+### Selection-Based Template Examples
+
+#### Error Handling Wrapper
+**File: [`examples/templates/bash/error-handling.sh`](../examples/templates/bash/error-handling.sh)**
+
+#### Function Wrapper
+**File: [`examples/templates/bash/function-wrap.sh`](../examples/templates/bash/function-wrap.sh)**
+
+**Usage:**
 ```vim
-:Boil /path/to/templates/react/component.jsx component=UserCard props="name,email,avatar"
+:Boil examples/templates/bash/function-wrap.sh function_name=cleanup_logs
 ```
 
-#### Documentation Templates
-```vim
-:Boil /path/to/templates/docs/api.md service=UserService version=2.1 maintainer=Backend
+#### Python Try-Catch
+**File: [`examples/templates/python/try-catch.py`](../examples/templates/python/try-catch.py)**
+
+#### Debug Logger
+**File: [`examples/templates/any/debug-wrap.txt`](../examples/templates/any/debug-wrap.txt)**
+
+### Practical Use Cases
+
+#### 1. Command History Enhancement
+```bash
+# From history: complex git command
+git log --oneline --graph --decorate --branches | head -20
+
+# Select → Apply function template → Reusable function
+show_git_tree() {
+  git log --oneline --graph --decorate --branches | head -20
+}
 ```
+
+#### 2. Script Development
+```bash
+# Working command in terminal
+find /var/log -name "*.log" -mtime +7 -delete
+
+# Convert to safe script with confirmation
+cleanup_old_logs() {
+  local files_to_delete
+  files_to_delete=$(find /var/log -name "*.log" -mtime +7)
+
+  if [[ -n "$files_to_delete" ]]; then
+    echo "Files to delete:"
+    echo "$files_to_delete"
+    read -p "Continue? (y/N): " confirm
+    [[ "$confirm" == "y" ]] && find /var/log -name "*.log" -mtime +7 -delete
+  fi
+}
+```
+
+#### 3. Code Block Enhancement
+```python
+# Existing working code
+data = requests.get("https://api.example.com/data").json()
+process_data(data)
+
+# Select → Apply error handling template
+try:
+    data = requests.get("https://api.example.com/data").json()
+    process_data(data)
+except requests.RequestException as e:
+    logger.error(f"API request failed: {e}")
+    raise
+except Exception as e:
+    logger.error(f"Data processing failed: {e}")
+    raise
+```
+
+### Integration with Development Workflow
+
+This approach integrates seamlessly with common development patterns:
+
+- **Command editing**:
+  - **bash/zsh**: `fc` or `Ctrl-x Ctrl-e` to edit commands
+  - **fish**: `Alt-e` or `edit_command_buffer`
+  - **ksh/dash**: `fc` command support
+- **History editing**: Search command history → select → wrap in function
+- **Interactive debugging**: Add logging/debugging around existing code blocks
+- **Script hardening**: Convert working commands into production-ready scripts
+
+The key insight: **Start with working code, then make it better**, rather than planning perfect code from the beginning.
+
+### Implementation Note
+
+The `__selection__` functionality demonstrates boil.nvim's core philosophy: instead of building selection support into the template engine, it's implemented as a single Lua function that leverages Neovim's APIs. This approach means:
+
+- No engine modifications required for new features
+- Full access to Neovim's capabilities
+- Easy to customize or extend for specific needs
+- Standard debugging and testing tools apply
+
+Other template engines would need significant architecture changes to add similar functionality. In boil.nvim, it's just configuration.
 
 ## Template Examples
 
-### Python Class Template
+### Example Templates
 
-**File: `python/class.py`**
-```python
-"""
-{{description}}
-Author: {{author}}
-Created: {{__date__}}
-"""
+**All example templates are located in the [`examples/templates/`](../examples/templates/) directory:**
 
-class {{class_name}}:
-    """{{class_description}}"""
-
-    def __init__(self):
-        """Initialize {{class_name}}."""
-        pass
-
-    def __str__(self):
-        """String representation of {{class_name}}."""
-        return f"{{class_name}}()"
-```
+- **[`python/class.py`](../examples/templates/python/class.py)** - Python class template with documentation
+- **[`python/basic.py`](../examples/templates/python/basic.py)** - Basic Python script structure
+- **[`bash/error-handling.sh`](../examples/templates/bash/error-handling.sh)** - Bash script with error handling
+- **[`bash/function-wrap.sh`](../examples/templates/bash/function-wrap.sh)** - Function wrapper template
+- **[`javascript/react-component.jsx`](../examples/templates/javascript/react-component.jsx)** - React component template
 
 **Usage:**
 ```vim
-:Boil /path/to/templates/python/class.py class_name=UserManager description="User management system"
+:Boil examples/templates/python/class.py class_name=UserManager description="User management system"
+:Boil examples/templates/bash/error-handling.sh
+:Boil examples/templates/javascript/react-component.jsx component=UserCard
 ```
 
-### React Component Template
-
-**File: `javascript/react-component.jsx`**
-```jsx
-import React from 'react';
-import PropTypes from 'prop-types';
-
-/**
- * {{component}} component
- * {{description}}
- * @author {{author}}
- */
-const {{component}} = ({ {{props}} }) => {
-  return (
-    <div className="{{component_class}}">
-      <h1>{{component}}</h1>
-      {/* Component content */}
-    </div>
-  );
-};
-
-{{component}}.propTypes = {
-  {{prop_types}}
-};
-
-{{component}}.defaultProps = {
-  {{default_props}}
-};
-
-export default {{component}};
-```
-
-**Usage:**
-```vim
-:Boil /path/to/templates/javascript/react-component.jsx component=UserCard props="name,email" author=Frontend
+To use these examples in your setup:
+```lua
+require('boil').setup({
+  templates = {
+    {
+      path = vim.fn.stdpath("data") .. "/lazy/boil.nvim/examples/templates",
+      name = "Examples"
+    }
+  }
+})
 ```

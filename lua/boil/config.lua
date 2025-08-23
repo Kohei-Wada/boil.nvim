@@ -30,6 +30,43 @@ M.defaults = {
     __date__ = function()
       return os.date "%Y-%m-%d"
     end,
+    __selection__ = function()
+      -- Check for visual marks first (from previous visual selection)
+      local start_pos = vim.fn.getpos "'<"
+      local end_pos = vim.fn.getpos "'>"
+
+      -- Check if we have valid visual marks
+      if start_pos[2] > 0 and end_pos[2] > 0 then
+        -- Check if this is a recent visual selection (not just old marks)
+        local current_line = vim.fn.line "."
+        if start_pos[2] <= current_line and current_line <= end_pos[2] then
+          local lines = vim.api.nvim_buf_get_lines(0, start_pos[2] - 1, end_pos[2], false)
+
+          if #lines == 0 then
+            return vim.api.nvim_get_current_line()
+          end
+
+          -- Get the last visual mode type
+          local vmode = vim.fn.visualmode()
+
+          -- Handle character-wise selection
+          if vmode == "v" then
+            if #lines == 1 then
+              lines[1] = string.sub(lines[1], start_pos[3], end_pos[3])
+            else
+              lines[1] = string.sub(lines[1], start_pos[3])
+              lines[#lines] = string.sub(lines[#lines], 1, end_pos[3])
+            end
+          end
+          -- For line-wise (V) and block-wise (^V), use full lines
+
+          return table.concat(lines, "\n")
+        end
+      end
+
+      -- Fallback to current line
+      return vim.api.nvim_get_current_line()
+    end,
   },
   logger = {
     level = vim.log.levels.INFO,
