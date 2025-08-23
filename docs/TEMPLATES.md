@@ -5,7 +5,6 @@ This document covers everything you need to know about creating and organizing t
 ## Table of Contents
 
 - [Template Basics](#template-basics)
-- [Directory Structure](#directory-structure)
 - [Variable Usage](#variable-usage)
 - [Runtime Variables](#runtime-variables)
 - [Advanced `__selection__` Usage](#advanced-__selection__-usage)
@@ -26,30 +25,7 @@ Templates use `{{variable}}` placeholders that get replaced during insertion. Se
 - No spaces inside braces: `{{name}}` ✓, `{{ name }}` ✗
 - Built-in variables start with `__`: `{{__filename__}}`
 
-## Directory Structure
-
-Organize templates in logical directories for easy discovery:
-
-```
-templates/
-├── python/
-│   ├── basic.py
-│   ├── class.py
-│   ├── script.py
-│   └── test.py
-├── javascript/
-│   ├── react-component.jsx
-│   ├── node-script.js
-│   └── express-route.js
-├── lua/
-│   ├── module.lua
-│   ├── plugin.lua
-│   └── spec.lua
-└── docs/
-    ├── readme.md
-    ├── api.md
-    └── changelog.md
-```
+Templates can be organized in any directory structure you prefer. The plugin recursively scans all configured directories and discovers templates automatically. See the [`examples/templates/`](../../examples/templates/) directory for one possible organization approach.
 
 ## Variable Usage
 
