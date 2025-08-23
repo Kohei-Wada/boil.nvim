@@ -128,9 +128,11 @@ Example:
 
 See the [Template Examples](#template-examples) section for complete usage examples with the provided example templates.
 
-## Advanced `__selection__` Usage
+## Example: Selection-Based Templates
 
-The `{{__selection__}}` variable is a useful feature for quick modification of existing code. Unlike traditional snippet engines that require pre-planning, `__selection__` works with code that already exists.
+The `{{__selection__}}` variable demonstrates the power of boil.nvim's programmable approach. What might require engine-level changes in traditional template systems is simply one Lua function in boil.nvim.
+
+This example shows how a simple core engine enables sophisticated functionality through programming rather than built-in features.
 
 ### Bash vi-mode Integration
 
@@ -256,6 +258,17 @@ This approach integrates seamlessly with common development patterns:
 - **Script hardening**: Convert working commands into production-ready scripts
 
 The key insight: **Start with working code, then make it better**, rather than planning perfect code from the beginning.
+
+### Implementation Note
+
+The `__selection__` functionality demonstrates boil.nvim's core philosophy: instead of building selection support into the template engine, it's implemented as a single Lua function that leverages Neovim's APIs. This approach means:
+
+- No engine modifications required for new features
+- Full access to Neovim's capabilities
+- Easy to customize or extend for specific needs
+- Standard debugging and testing tools apply
+
+Other template engines would need significant architecture changes to add similar functionality. In boil.nvim, it's just configuration.
 
 ## Template Examples
 

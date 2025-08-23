@@ -97,18 +97,105 @@ Variables are processed with the following priority (highest to lowest):
 3. **Global variables** (defined in main config)
 4. **Built-in variables**
 
-### Design Philosophy: Less is More
+### Design Philosophy: Programmable Simplicity
 
-**boil.nvim embraces the "Less is More" philosophy** - achieving maximum flexibility through minimal complexity. The template engine remains compact and focused, providing unlimited extensibility by delegating complex logic to Lua configuration rather than building it into the engine itself.
+**boil.nvim demonstrates that the most powerful tools often have the simplest cores.** By limiting the template engine to pure string substitution (`{{variable}}`), we unlock unlimited extensibility through Lua programming.
 
-This minimalist approach:
-- Maintains simplicity and reliability (fewer bugs in less code)
-- Leverages Lua's full programming capabilities instead of reinventing them
-- Provides seamless integration with Neovim's APIs and ecosystem
-- Keeps debugging straightforward in a single language environment
-- Allows users to bring their own complexity only when needed
+#### The Revolutionary Insight
 
-**The template engine intentionally does just one thing: variable substitution** via `{{variable}}` placeholders. Everything else - conditionals, loops, complex transformations - belongs in your Lua configuration where you have the full power of the language at your disposal.
+Traditional template engines try to anticipate every possible use case:
+
+```javascript
+// Traditional approach: build features into the engine
+if (condition) { /* engine handles conditionals */ }
+for (item in items) { /* engine handles loops */ }
+include "other-template" /* engine handles includes */
+```
+
+boil.nvim takes the opposite approach:
+
+```lua
+-- Simple engine: just string replacement
+content:gsub("{{" .. key .. "}}", replacement)
+
+-- Complex logic: delegated to programming
+variables = {
+  conditional_content = function()
+    if some_condition() then
+      return "content A"
+    else
+      return "content B"
+    end
+  end,
+
+  loop_content = function()
+    local items = get_items()
+    local result = {}
+    for _, item in ipairs(items) do
+      table.insert(result, process_item(item))
+    end
+    return table.concat(result, "\n")
+  end,
+
+  included_content = function()
+    return vim.fn.readfile("other-template.txt")
+  end
+}
+```
+
+#### Why This Approach Wins
+
+1. **Infinite Extensibility**: If you can program it in Lua, you can use it in templates
+2. **No Engine Limitations**: Never constrained by what the template engine "supports"
+3. **Full Programming Power**: Variables, functions, APIs, file system, network - everything accessible
+4. **Maintainability**: Complex logic lives in proper code, not template syntax
+5. **Debuggability**: Use standard Lua debugging tools instead of template-specific ones
+6. **Performance**: No parsing overhead for complex template syntax
+
+#### Real-World Power Examples
+
+```lua
+variables = {
+  -- Dynamic API integration
+  github_issues = function()
+    local cmd = "gh issue list --json number,title --limit 5"
+    local result = vim.fn.system(cmd)
+    local issues = vim.fn.json_decode(result)
+    local lines = {}
+    for _, issue in ipairs(issues) do
+      table.insert(lines, string.format("- #%d %s", issue.number, issue.title))
+    end
+    return table.concat(lines, "\n")
+  end,
+
+  -- Intelligent code analysis
+  class_dependencies = function()
+    local buffer_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    local imports = {}
+    for _, line in ipairs(buffer_lines) do
+      local import = line:match("^import%s+(.+)")
+      if import then
+        table.insert(imports, import)
+      end
+    end
+    return table.concat(imports, "\n")
+  end,
+
+  -- Interactive template generation
+  component_props = function()
+    local props = {}
+    while true do
+      local prop = vim.fn.input("Add prop (empty to finish): ")
+      if prop == "" then break end
+      local type = vim.fn.input("Type for " .. prop .. ": ")
+      table.insert(props, prop .. ": " .. type)
+    end
+    return table.concat(props, ",\n  ")
+  end
+}
+```
+
+**The template engine intentionally does just one thing: variable substitution.** Everything else - conditionals, loops, API calls, user interaction, file system operations, external integrations - belongs in your Lua configuration where you have unlimited power and proper tooling.
 
 ### Built-in Variables
 

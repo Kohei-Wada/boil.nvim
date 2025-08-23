@@ -100,17 +100,51 @@ See the `examples/templates/` directory for more ready-to-use templates includin
 - [Configuration Guide](docs/CONFIGURATION.md) - Detailed setup
 - [Template Creation](docs/TEMPLATES.md) - Creating templates
 
-## Philosophy
+## Design Philosophy: Less is More
 
-Simple variable substitution only. Complex logic belongs in Lua config:
+boil.nvim embodies a minimalist approach to template engines: **do one thing exceptionally well, and delegate everything else to a powerful programming language.**
+
+### The Core Principle
 
 ```lua
+-- The entire template engine in essence:
+content:gsub("{{" .. key .. "}}", replacement)
+```
+
+### Why This Approach Works
+
+Instead of building complex features into the template engine itself, boil.nvim provides a simple string substitution mechanism and delegates all complex logic to Lua functions. This creates unlimited extensibility through programming rather than built-in features.
+
+```lua
+-- Want conditional logic? Program it in Lua
 variables = {
   header = function()
-    return vim.bo.filetype == "python" and "#!/usr/bin/env python3" or ""
+    if vim.bo.filetype == "python" then
+      return "#!/usr/bin/env python3"
+    elseif vim.bo.filetype == "bash" then
+      return "#!/bin/bash"
+    end
+    return ""
+  end,
+
+  -- Want API integration? Program it in Lua
+  project_info = function()
+    local handle = io.popen("gh repo view --json name,description")
+    local result = handle:read("*a")
+    handle:close()
+    return vim.fn.json_decode(result).description
+  end,
+
+  -- Want user interaction? Program it in Lua
+  priority = function()
+    return vim.fn.input("Priority (1-5): ")
   end
 }
 ```
+
+### The Power of Delegation
+
+This design means that any functionality you can imagine can be implemented through Lua configuration. The `{{__selection__}}` variable, for example, is not a special built-in feature—it's simply one function that demonstrates what's possible when you combine a simple engine with a powerful programming language.
 
 ## Development
 
