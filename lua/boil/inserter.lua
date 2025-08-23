@@ -5,16 +5,12 @@ local logger = require "boil.logger"
 
 require "boil.types"
 
----Check if visual mode selection is active
----@return boolean is_visual_active True if visual mode selection is active
-local function is_visual_mode_active()
+---Get visual mode state and selection range
+---@return table|nil visual_state Table with range info and active status, or nil if no selection
+local function get_visual_state()
   local mode = vim.fn.mode()
-  return mode == "v" or mode == "V" or mode == "\22" -- \22 is Ctrl-V (visual-block)
-end
+  local is_active_visual = mode == "v" or mode == "V" or mode == "\22" -- \22 is Ctrl-V (visual-block)
 
----Get visual mode selection range
----@return table|nil selection_range Table with start_row, start_col, end_row, end_col or nil if no selection
-local function get_visual_selection_range()
   local start_pos = vim.fn.getpos "'<"
   local end_pos = vim.fn.getpos "'>"
 
@@ -28,6 +24,7 @@ local function get_visual_selection_range()
     start_col = start_pos[3] - 1,
     end_row = end_pos[2] - 1,
     end_col = end_pos[3] - 1,
+    is_active = is_active_visual,
   }
 end
 
@@ -52,22 +49,18 @@ M.insert_template_content = function(template, variables)
   local lines = vim.split(expanded, "\n", { plain = true })
 
   -- Check if we're in visual mode or have a recent visual selection
-  local is_visual = is_visual_mode_active()
-  local selection_range = get_visual_selection_range()
+  local visual_state = get_visual_state()
 
-  if is_visual or selection_range then
-    -- Replace visual selection with template content
-    if selection_range then
-      -- Exit visual mode first to clear selection
-      if is_visual then
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
-      end
-
-      -- Replace the selected range with template content
-      vim.api.nvim_buf_set_lines(0, selection_range.start_row, selection_range.end_row + 1, false, lines)
-
-      logger.info("Template replaced selection: " .. templates.get_display_name(template))
+  if visual_state then
+    -- Exit visual mode first to clear selection if currently active
+    if visual_state.is_active then
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
     end
+
+    -- Replace the selected range with template content
+    vim.api.nvim_buf_set_lines(0, visual_state.start_row, visual_state.end_row + 1, false, lines)
+
+    logger.info("Template replaced selection: " .. templates.get_display_name(template))
   else
     -- Handle cursor position insertion
     local row, col = unpack(vim.api.nvim_win_get_cursor(0))
