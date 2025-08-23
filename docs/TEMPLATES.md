@@ -8,6 +8,7 @@ This document covers everything you need to know about creating and organizing t
 - [Directory Structure](#directory-structure)
 - [Variable Usage](#variable-usage)
 - [Runtime Variables](#runtime-variables)
+- [Advanced `__selection__` Usage](#advanced-__selection__-usage)
 - [Template Examples](#template-examples)
 
 ## Template Basics
@@ -16,21 +17,7 @@ Templates are simple text files with `{{variable}}` placeholders that get replac
 
 ### Simple Template Example
 
-**File: `python/basic.py`**
-```python
-#!/usr/bin/env python3
-"""
-{{__filename__}}
-Author: {{__author__}}
-Date: {{__date__}}
-"""
-
-def main():
-    pass
-
-if __name__ == "__main__":
-    main()
-```
+Templates use `{{variable}}` placeholders that get replaced during insertion. See [`examples/templates/python/basic.py`](../../examples/templates/python/basic.py) for a complete example.
 
 ### Variable Syntax
 
@@ -72,7 +59,7 @@ templates/
 - `{{__basename__}}` - Filename without extension (`app`)
 - `{{__date__}}` - Current date in YYYY-MM-DD format
 - `{{__author__}}` - Author from configuration
-- `{{__selection__}}` - Current visual selection or current line content
+- `{{__selection__}}` - Current visual selection or current line content (see [Advanced Usage](#advanced-__selection__-usage))
 
 ### Custom Variables
 
@@ -163,20 +150,7 @@ Example:
 
 ### Practical Examples
 
-#### Dynamic Project Setup
-```vim
-:Boil /path/to/templates/python/project.py project=WebAPI author=TeamLead version=1.0
-```
-
-#### Component Generation
-```vim
-:Boil /path/to/templates/react/component.jsx component=UserCard props="name,email,avatar"
-```
-
-#### Documentation Templates
-```vim
-:Boil /path/to/templates/docs/api.md service=UserService version=2.1 maintainer=Backend
-```
+See the [Template Examples](#template-examples) section for complete usage examples with the provided example templates.
 
 ## Advanced `__selection__` Usage
 
