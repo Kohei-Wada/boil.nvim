@@ -33,11 +33,11 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```vim
 " Basic template insertion
 :Boil
-:Boil python/class.py
+:Boil /path/to/templates/python/class.py
 
 " With runtime variables
-:Boil template.py class_name=UserManager author=John
-:Boil readme.md project="My App" description="A cool tool"
+:Boil /path/to/templates/template.py class_name=UserManager author=John
+:Boil /path/to/templates/readme.md project="My App" description="A cool tool"
 
 " Using Telescope
 :Telescope boil
@@ -81,7 +81,7 @@ class {{class_name}}:
 
 **Usage:**
 ```vim
-:Boil python/class.py class_name=User description="User model" author=Me
+:Boil /path/to/templates/python/class.py class_name=User description="User model" author=Me
 ```
 
 ## Documentation
