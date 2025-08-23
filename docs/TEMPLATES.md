@@ -134,24 +134,24 @@ The `{{__selection__}}` variable demonstrates the power of boil.nvim's programma
 
 This example shows how a simple core engine enables sophisticated functionality through programming rather than built-in features.
 
-### Bash vi-mode Integration
+### Shell Integration
 
 This workflow can enhance command-line productivity:
 
-1. **Start with existing command**: Type or recall a bash command
-2. **Enter vi-mode**: Press `Ctrl-x Ctrl-e` or `v` (in vi normal mode) to open editor
+1. **Start with existing command**: Type or recall a shell command
+2. **Open editor**: Use your shell's editor integration (e.g., `fc`, `Ctrl-x Ctrl-e`, or `Alt-e`)
 3. **Visual select**: Select the command or part of it
 4. **Apply template**: Use `:Boil` to wrap selection with error handling, logging, or functions
 
 #### Example Workflow
 
 ```bash
-# 1. Original command in bash
+# 1. Original command in your shell
 curl -X POST https://api.example.com/users -d '{"name": "John"}'
 
-# 2. Ctrl-x Ctrl-e opens editor with command
+# 2. Open editor (fc, Ctrl-x Ctrl-e, Alt-e, etc.)
 # 3. Visual select the curl command
-# 4. :Boil /path/to/templates/bash/error-handling.sh
+# 4. :Boil examples/templates/bash/error-handling.sh
 
 # 5. Result: Robust script with error handling
 #!/bin/bash
@@ -252,8 +252,11 @@ except Exception as e:
 
 This approach integrates seamlessly with common development patterns:
 
-- **fc command**: `fc` opens last command in editor for selection-based templating
-- **History editing**: `history | grep pattern` → select command → wrap in function
+- **Command editing**:
+  - **bash/zsh**: `fc` or `Ctrl-x Ctrl-e` to edit commands
+  - **fish**: `Alt-e` or `edit_command_buffer`
+  - **ksh/dash**: `fc` command support
+- **History editing**: Search command history → select → wrap in function
 - **Interactive debugging**: Add logging/debugging around existing code blocks
 - **Script hardening**: Convert working commands into production-ready scripts
 
