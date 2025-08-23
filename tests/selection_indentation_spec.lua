@@ -17,7 +17,7 @@ describe("Selection variable indentation", function()
 }]]
 
     -- Expand the template
-    local result = expander.expand(template_content, test_config)
+    local result = expander.expand(template_content, test_config.variables)
 
     -- Expected result with proper indentation (adds 4 spaces to each line, preserving relative indentation)
     local expected = [[main () {
@@ -40,7 +40,7 @@ describe("Selection variable indentation", function()
     }
 
     local template_content = "    {{__selection__}}"
-    local result = expander.expand(template_content, test_config)
+    local result = expander.expand(template_content, test_config.variables)
 
     local expected = "    line1\n    line2\n    line3"
     assert.are.equal(expected, result)
@@ -60,7 +60,7 @@ function wrapper() {
     {{__selection__}}
 }]]
 
-    local result = expander.expand(template_content, test_config)
+    local result = expander.expand(template_content, test_config.variables)
 
     local expected = [[
 function wrapper() {
@@ -82,7 +82,7 @@ function wrapper() {
     }
 
     local template_content = "    {{__selection__}}"
-    local result = expander.expand(template_content, test_config)
+    local result = expander.expand(template_content, test_config.variables)
 
     local expected = "    single line content"
     assert.are.equal(expected, result)
@@ -98,7 +98,7 @@ function wrapper() {
     }
 
     local template_content = "\t{{__selection__}}"
-    local result = expander.expand(template_content, test_config)
+    local result = expander.expand(template_content, test_config.variables)
 
     local expected = "\tline1\n\tline2"
     assert.are.equal(expected, result)
@@ -119,7 +119,7 @@ class MyClass:
     {{__selection__}}
 ]]
 
-    local result = expander.expand(template_content, test_config)
+    local result = expander.expand(template_content, test_config.variables)
 
     local expected = [[
 class MyClass:
@@ -141,7 +141,7 @@ class MyClass:
     }
 
     local template_content = "    {{__selection__}}"
-    local result = expander.expand(template_content, test_config)
+    local result = expander.expand(template_content, test_config.variables)
 
     local expected = "    line1\n    \n    line3"
     assert.are.equal(expected, result)
@@ -164,7 +164,7 @@ done]]
     {{__selection__}}
 }]]
 
-    local result = expander.expand(template_content, test_config)
+    local result = expander.expand(template_content, test_config.variables)
 
     local expected = [[main () {
     for i in $(seq 10);

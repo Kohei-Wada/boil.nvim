@@ -33,15 +33,14 @@ end
 
 ---Insert template content into buffer
 ---@param template Template Template to insert
----@param config Config Plugin configuration
----@param runtime_variables? table<string, string> Runtime variables to use during expansion
-M.insert_template_content = function(template, config, runtime_variables)
+---@param variables table<string, any> Merged variables to use for expansion
+M.insert_template_content = function(template, variables)
   local content = templates.load_template(template.path)
   if not content then
     return
   end
 
-  local expanded, err = expander.expand(content, config, template.config, runtime_variables)
+  local expanded, err = expander.expand(content, variables)
   if err then
     logger.warn("Template expansion warnings:\n" .. err)
   end
