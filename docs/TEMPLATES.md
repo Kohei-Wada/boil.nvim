@@ -72,7 +72,7 @@ The `:Boil` command uses absolute template paths and supports runtime variables 
 :Boil /home/user/.config/nvim/templates/react/component.jsx component=UserProfile author=Jane team=Frontend
 
 " With quotes for values containing spaces
-:Boil /home/user/.config/nvim/templates/docs/readme.md project="My Amazing App" description="A revolutionary tool"
+:Boil /home/user/.config/nvim/templates/docs/readme.md project="My Amazing App" description="A useful tool"
 
 " Escape sequences for special characters
 :Boil /home/user/.config/nvim/templates/config/database.py database="localhost:5432" connection="user=admin\\npass=secret"
@@ -130,11 +130,11 @@ See the [Template Examples](#template-examples) section for complete usage examp
 
 ## Advanced `__selection__` Usage
 
-The `{{__selection__}}` variable is one of boil.nvim's most powerful features, enabling instant transformation of existing code. Unlike traditional snippet engines that require pre-planning, `__selection__` works with code that already exists.
+The `{{__selection__}}` variable is a useful feature for quick modification of existing code. Unlike traditional snippet engines that require pre-planning, `__selection__` works with code that already exists.
 
 ### Bash vi-mode Integration
 
-This workflow revolutionizes command-line productivity:
+This workflow can enhance command-line productivity:
 
 1. **Start with existing command**: Type or recall a bash command
 2. **Enter vi-mode**: Press `Ctrl-x Ctrl-e` or `v` (in vi normal mode) to open editor
@@ -166,13 +166,13 @@ main() {
 main "$@"
 ```
 
-### Why This Is Revolutionary
+### Why This Approach Is Different
 
-Unlike snippets which require pre-planning, `__selection__` enables **instant code transformation**:
+Unlike snippets which require pre-planning, `__selection__` enables **quick code modification**:
 
 | Traditional Snippets | `__selection__` Method |
 |---------------------|------------------------|
-| Plan → Write snippet → Code | Code → Select → Transform |
+| Plan → Write snippet → Code | Code → Select → Modify |
 | Static placeholders | Dynamic existing content |
 | Editor-only workflow | Command-line integrated |
 | New code creation | Existing code enhancement |
@@ -214,7 +214,7 @@ show_git_tree() {
 # Working command in terminal
 find /var/log -name "*.log" -mtime +7 -delete
 
-# Transform to safe script with confirmation
+# Convert to safe script with confirmation
 cleanup_old_logs() {
   local files_to_delete
   files_to_delete=$(find /var/log -name "*.log" -mtime +7)
@@ -253,7 +253,7 @@ This approach integrates seamlessly with common development patterns:
 - **fc command**: `fc` opens last command in editor for selection-based templating
 - **History editing**: `history | grep pattern` → select command → wrap in function
 - **Interactive debugging**: Add logging/debugging around existing code blocks
-- **Script hardening**: Transform working commands into production-ready scripts
+- **Script hardening**: Convert working commands into production-ready scripts
 
 The key insight: **Start with working code, then make it better**, rather than planning perfect code from the beginning.
 

@@ -93,7 +93,7 @@ class {{class_name}}:
 :Boil examples/templates/python/class.py class_name=User description="User model" author=Me
 ```
 
-See the `examples/templates/` directory for more ready-to-use templates including bash error handling, React components, and selection-based transformations.
+See the `examples/templates/` directory for more ready-to-use templates including bash error handling, React components, and selection-based templates.
 
 ## Documentation
 
