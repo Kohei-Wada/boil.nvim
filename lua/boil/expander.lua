@@ -33,7 +33,7 @@ M.expand = function(template_content, config, template_config, runtime_variables
 
   -- Process all variables uniformly
   for key, value in pairs(variables) do
-    local pattern = "{{" .. key .. "}}"
+    local pattern = "{{" .. vim.pesc(key) .. "}}"
     local replacement
 
     if type(value) == "function" then
@@ -48,7 +48,46 @@ M.expand = function(template_content, config, template_config, runtime_variables
       replacement = tostring(value)
     end
 
-    result = result:gsub(pattern, escape_replacement(replacement))
+    -- Handle multi-line replacements with proper indentation
+    if replacement:find "\n" then
+      -- Check if the placeholder appears with indentation (at line start)
+      local indented_pattern = "(\n%s*)" .. pattern
+      local start_pattern = "^(%s+)" .. pattern
+
+      -- Try to replace indented occurrences first
+      local replaced = false
+      result = result:gsub(indented_pattern, function(prefix)
+        replaced = true
+        local indent = prefix:match "\n(%s*)"
+        local lines = vim.split(replacement, "\n", { plain = true })
+        -- Add indentation to the beginning of each line
+        local indented_lines = {}
+        for _, line in ipairs(lines) do
+          table.insert(indented_lines, indent .. line)
+        end
+        return "\n" .. table.concat(indented_lines, "\n")
+      end)
+
+      -- Handle the case where the placeholder is at the beginning of the file with indentation
+      result = result:gsub(start_pattern, function(indent)
+        replaced = true
+        local lines = vim.split(replacement, "\n", { plain = true })
+        -- Add indentation to the beginning of each line
+        local indented_lines = {}
+        for _, line in ipairs(lines) do
+          table.insert(indented_lines, indent .. line)
+        end
+        return table.concat(indented_lines, "\n")
+      end)
+
+      -- If no indented replacements were made, do a simple replacement
+      if not replaced then
+        result = result:gsub(pattern, escape_replacement(replacement))
+      end
+    else
+      -- Single line replacement, use the original method
+      result = result:gsub(pattern, escape_replacement(replacement))
+    end
   end
 
   -- Check for unexpanded variables
