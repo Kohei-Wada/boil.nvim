@@ -50,14 +50,22 @@ end
 ---@return boolean replaced Whether any replacement was made
 local function replace_multiline_variable(result, pattern, replacement)
   local replaced = false
+  local lines = nil -- Lazy initialization to avoid duplicate vim.split calls
+
+  -- Helper function to get lines, splitting only once
+  local function get_lines()
+    if not lines then
+      lines = vim.split(replacement, "\n", { plain = true })
+    end
+    return lines
+  end
 
   -- Check if the placeholder appears with indentation (at line start after newline)
   local indented_pattern = "(\n%s*)" .. pattern
   result = result:gsub(indented_pattern, function(prefix)
     replaced = true
     local indent = prefix:match "\n(%s*)"
-    local lines = vim.split(replacement, "\n", { plain = true })
-    local indented_lines = apply_indentation(lines, indent)
+    local indented_lines = apply_indentation(get_lines(), indent)
     return "\n" .. table.concat(indented_lines, "\n")
   end)
 
@@ -65,8 +73,7 @@ local function replace_multiline_variable(result, pattern, replacement)
   local start_pattern = "^(%s+)" .. pattern
   result = result:gsub(start_pattern, function(indent)
     replaced = true
-    local lines = vim.split(replacement, "\n", { plain = true })
-    local indented_lines = apply_indentation(lines, indent)
+    local indented_lines = apply_indentation(get_lines(), indent)
     return table.concat(indented_lines, "\n")
   end)
 
