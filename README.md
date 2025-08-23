@@ -35,9 +35,9 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 :Boil
 :Boil /path/to/templates/python/class.py
 
-" With runtime variables
-:Boil /path/to/templates/template.py class_name=UserManager author=John
-:Boil /path/to/templates/readme.md project="My App" description="A cool tool"
+" With runtime variables (see examples/ directory)
+:Boil examples/templates/python/class.py class_name=UserManager author=John
+:Boil examples/templates/bash/error-handling.sh
 
 " Using Telescope
 :Telescope boil
@@ -54,6 +54,11 @@ require('boil').setup({
     {
       path = "~/.config/nvim/templates",
       variables = { author = "John Doe" }
+    },
+    -- Try the examples directory
+    {
+      path = vim.fn.stdpath("data") .. "/lazy/boil.nvim/examples/templates",
+      name = "Examples"
     }
   },
   variables = {
@@ -67,7 +72,7 @@ For Telescope: `require('telescope').load_extension('boil')`
 
 ## Template Example
 
-**Template file: `python/class.py`**
+**Template file: `examples/templates/python/class.py`**
 ```python
 """{{description}}
 Author: {{author}}
@@ -81,8 +86,10 @@ class {{class_name}}:
 
 **Usage:**
 ```vim
-:Boil /path/to/templates/python/class.py class_name=User description="User model" author=Me
+:Boil examples/templates/python/class.py class_name=User description="User model" author=Me
 ```
+
+See the `examples/templates/` directory for more ready-to-use templates including bash error handling, React components, and selection-based transformations.
 
 ## Documentation
 

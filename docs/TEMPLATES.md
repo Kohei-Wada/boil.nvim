@@ -230,56 +230,21 @@ Unlike snippets which require pre-planning, `__selection__` enables **instant co
 ### Selection-Based Template Examples
 
 #### Error Handling Wrapper
-**File: `bash/error-handling.sh`**
-```bash
-#!/bin/bash
-set -euo pipefail
-
-main() {
-  {{__selection__}} || {
-    echo "Error: Command failed" >&2
-    exit 1
-  }
-}
-
-main "$@"
-```
+**File: [`examples/templates/bash/error-handling.sh`](../../examples/templates/bash/error-handling.sh)**
 
 #### Function Wrapper
-**File: `bash/function-wrap.sh`**
-```bash
-{{function_name}}() {
-  local result
-  result=$({{__selection__}}) || {
-    echo "Error in {{function_name}}: Command failed" >&2
-    return 1
-  }
-  echo "$result"
-}
-```
+**File: [`examples/templates/bash/function-wrap.sh`](../../examples/templates/bash/function-wrap.sh)**
 
 **Usage:**
 ```vim
-:Boil /path/to/templates/bash/function-wrap.sh function_name=cleanup_logs
+:Boil examples/templates/bash/function-wrap.sh function_name=cleanup_logs
 ```
 
 #### Python Try-Catch
-**File: `python/try-catch.py`**
-```python
-try:
-    {{__selection__}}
-except Exception as e:
-    print(f"Error: {e}", file=sys.stderr)
-    sys.exit(1)
-```
+**File: [`examples/templates/python/try-catch.py`](../../examples/templates/python/try-catch.py)**
 
 #### Debug Logger
-**File: `any/debug-wrap.txt`**
-```
-echo "DEBUG: About to execute: {{__selection__}}"
-{{__selection__}}
-echo "DEBUG: Command completed with exit code: $?"
-```
+**File: [`examples/templates/any/debug-wrap.txt`](../../examples/templates/any/debug-wrap.txt)**
 
 ### Practical Use Cases
 
@@ -344,66 +309,31 @@ The key insight: **Start with working code, then make it better**, rather than p
 
 ## Template Examples
 
-### Python Class Template
+### Example Templates
 
-**File: `python/class.py`**
-```python
-"""
-{{description}}
-Author: {{author}}
-Created: {{__date__}}
-"""
+**All example templates are located in the [`examples/templates/`](../../examples/templates/) directory:**
 
-class {{class_name}}:
-    """{{class_description}}"""
-
-    def __init__(self):
-        """Initialize {{class_name}}."""
-        pass
-
-    def __str__(self):
-        """String representation of {{class_name}}."""
-        return f"{{class_name}}()"
-```
+- **[`python/class.py`](../../examples/templates/python/class.py)** - Python class template with documentation
+- **[`python/basic.py`](../../examples/templates/python/basic.py)** - Basic Python script structure
+- **[`bash/error-handling.sh`](../../examples/templates/bash/error-handling.sh)** - Bash script with error handling
+- **[`bash/function-wrap.sh`](../../examples/templates/bash/function-wrap.sh)** - Function wrapper template
+- **[`javascript/react-component.jsx`](../../examples/templates/javascript/react-component.jsx)** - React component template
 
 **Usage:**
 ```vim
-:Boil /path/to/templates/python/class.py class_name=UserManager description="User management system"
+:Boil examples/templates/python/class.py class_name=UserManager description="User management system"
+:Boil examples/templates/bash/error-handling.sh
+:Boil examples/templates/javascript/react-component.jsx component=UserCard
 ```
 
-### React Component Template
-
-**File: `javascript/react-component.jsx`**
-```jsx
-import React from 'react';
-import PropTypes from 'prop-types';
-
-/**
- * {{component}} component
- * {{description}}
- * @author {{author}}
- */
-const {{component}} = ({ {{props}} }) => {
-  return (
-    <div className="{{component_class}}">
-      <h1>{{component}}</h1>
-      {/* Component content */}
-    </div>
-  );
-};
-
-{{component}}.propTypes = {
-  {{prop_types}}
-};
-
-{{component}}.defaultProps = {
-  {{default_props}}
-};
-
-export default {{component}};
-```
-
-**Usage:**
-```vim
-:Boil /path/to/templates/javascript/react-component.jsx component=UserCard props="name,email" author=Frontend
+To use these examples in your setup:
+```lua
+require('boil').setup({
+  templates = {
+    {
+      path = vim.fn.stdpath("data") .. "/lazy/boil.nvim/examples/templates",
+      name = "Examples"
+    }
+  }
+})
 ```
