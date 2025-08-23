@@ -42,6 +42,8 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 " Using Telescope
 :Telescope boil
 :Telescope boil author=Jane team=Frontend
+
+" Note: Telescope integration with __selection__ variable may be unstable
 ```
 
 **Variable Priority**: Runtime > Template-specific > Global > Built-in
@@ -69,6 +71,8 @@ require('boil').setup({
 ```
 
 For Telescope: `require('telescope').load_extension('boil')`
+
+**Known Issue**: When using templates with `{{__selection__}}` variable through Telescope integration, Visual selection state may not be properly detected when using Telescope picker. For reliable `__selection__` usage, use the `:Boil` command directly.
 
 ## Template Example
 
