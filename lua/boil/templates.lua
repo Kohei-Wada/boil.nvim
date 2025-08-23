@@ -75,22 +75,20 @@ M.find_templates = function(config)
       end
 
       if should_include then
-        local abs_path = template.path
-
         -- Check for duplicates
-        if path_to_template[abs_path] then
+        if path_to_template[template.path] then
           -- Template already exists - keep the more specific source (last one wins)
           logger.debug(
             string.format(
               "Duplicate template detected: %s\n  Replacing: %s\n  With: %s",
-              abs_path,
-              get_display_name(path_to_template[abs_path]),
+              template.path,
+              get_display_name(path_to_template[template.path]),
               get_display_name(template)
             )
           )
           -- Remove the old template from all_templates
           for i = #all_templates, 1, -1 do
-            if all_templates[i].path == abs_path then
+            if all_templates[i].path == template.path then
               table.remove(all_templates, i)
               break
             end
@@ -99,7 +97,7 @@ M.find_templates = function(config)
 
         -- Add the new template
         table.insert(all_templates, template)
-        path_to_template[abs_path] = template
+        path_to_template[template.path] = template
       end
     end
   end
