@@ -16,7 +16,7 @@ Templates are simple text files with `{{variable}}` placeholders that get replac
 
 ### Simple Template Example
 
-Templates use `{{variable}}` placeholders that get replaced during insertion. See [`examples/templates/python/basic.py`](../../examples/templates/python/basic.py) for a complete example.
+Templates use `{{variable}}` placeholders that get replaced during insertion. See [`examples/templates/python/basic.py`](../examples/templates/python/basic.py) for a complete example.
 
 ### Variable Syntax
 
@@ -25,7 +25,7 @@ Templates use `{{variable}}` placeholders that get replaced during insertion. Se
 - No spaces inside braces: `{{name}}` ✓, `{{ name }}` ✗
 - Built-in variables start with `__`: `{{__filename__}}`
 
-Templates can be organized in any directory structure you prefer. The plugin recursively scans all configured directories and discovers templates automatically. See the [`examples/templates/`](../../examples/templates/) directory for one possible organization approach.
+Templates can be organized in any directory structure you prefer. The plugin recursively scans all configured directories and discovers templates automatically. See the [`examples/templates/`](../examples/templates/) directory for one possible organization approach.
 
 ## Variable Usage
 
@@ -180,10 +180,10 @@ Unlike snippets which require pre-planning, `__selection__` enables **instant co
 ### Selection-Based Template Examples
 
 #### Error Handling Wrapper
-**File: [`examples/templates/bash/error-handling.sh`](../../examples/templates/bash/error-handling.sh)**
+**File: [`examples/templates/bash/error-handling.sh`](../examples/templates/bash/error-handling.sh)**
 
 #### Function Wrapper
-**File: [`examples/templates/bash/function-wrap.sh`](../../examples/templates/bash/function-wrap.sh)**
+**File: [`examples/templates/bash/function-wrap.sh`](../examples/templates/bash/function-wrap.sh)**
 
 **Usage:**
 ```vim
@@ -191,10 +191,10 @@ Unlike snippets which require pre-planning, `__selection__` enables **instant co
 ```
 
 #### Python Try-Catch
-**File: [`examples/templates/python/try-catch.py`](../../examples/templates/python/try-catch.py)**
+**File: [`examples/templates/python/try-catch.py`](../examples/templates/python/try-catch.py)**
 
 #### Debug Logger
-**File: [`examples/templates/any/debug-wrap.txt`](../../examples/templates/any/debug-wrap.txt)**
+**File: [`examples/templates/any/debug-wrap.txt`](../examples/templates/any/debug-wrap.txt)**
 
 ### Practical Use Cases
 
@@ -261,13 +261,13 @@ The key insight: **Start with working code, then make it better**, rather than p
 
 ### Example Templates
 
-**All example templates are located in the [`examples/templates/`](../../examples/templates/) directory:**
+**All example templates are located in the [`examples/templates/`](../examples/templates/) directory:**
 
-- **[`python/class.py`](../../examples/templates/python/class.py)** - Python class template with documentation
-- **[`python/basic.py`](../../examples/templates/python/basic.py)** - Basic Python script structure
-- **[`bash/error-handling.sh`](../../examples/templates/bash/error-handling.sh)** - Bash script with error handling
-- **[`bash/function-wrap.sh`](../../examples/templates/bash/function-wrap.sh)** - Function wrapper template
-- **[`javascript/react-component.jsx`](../../examples/templates/javascript/react-component.jsx)** - React component template
+- **[`python/class.py`](../examples/templates/python/class.py)** - Python class template with documentation
+- **[`python/basic.py`](../examples/templates/python/basic.py)** - Basic Python script structure
+- **[`bash/error-handling.sh`](../examples/templates/bash/error-handling.sh)** - Bash script with error handling
+- **[`bash/function-wrap.sh`](../examples/templates/bash/function-wrap.sh)** - Function wrapper template
+- **[`javascript/react-component.jsx`](../examples/templates/javascript/react-component.jsx)** - React component template
 
 **Usage:**
 ```vim
