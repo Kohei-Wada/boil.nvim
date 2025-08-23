@@ -72,6 +72,7 @@ templates/
 - `{{__basename__}}` - Filename without extension (`app`)
 - `{{__date__}}` - Current date in YYYY-MM-DD format
 - `{{__author__}}` - Author from configuration
+- `{{__selection__}}` - Current visual selection or current line content
 
 ### Custom Variables
 
@@ -176,6 +177,165 @@ Example:
 ```vim
 :Boil /path/to/templates/docs/api.md service=UserService version=2.1 maintainer=Backend
 ```
+
+## Advanced `__selection__` Usage
+
+The `{{__selection__}}` variable is one of boil.nvim's most powerful features, enabling instant transformation of existing code. Unlike traditional snippet engines that require pre-planning, `__selection__` works with code that already exists.
+
+### Bash vi-mode Integration
+
+This workflow revolutionizes command-line productivity:
+
+1. **Start with existing command**: Type or recall a bash command
+2. **Enter vi-mode**: Press `Ctrl-x Ctrl-e` or `v` (in vi normal mode) to open editor
+3. **Visual select**: Select the command or part of it
+4. **Apply template**: Use `:Boil` to wrap selection with error handling, logging, or functions
+
+#### Example Workflow
+
+```bash
+# 1. Original command in bash
+curl -X POST https://api.example.com/users -d '{"name": "John"}'
+
+# 2. Ctrl-x Ctrl-e opens editor with command
+# 3. Visual select the curl command
+# 4. :Boil /path/to/templates/bash/error-handling.sh
+
+# 5. Result: Robust script with error handling
+#!/bin/bash
+set -euo pipefail
+
+main() {
+  curl -X POST https://api.example.com/users -d '{"name": "John"}' || {
+    echo "Error: API call failed" >&2
+    echo "Check network connection and API endpoint" >&2
+    exit 1
+  }
+}
+
+main "$@"
+```
+
+### Why This Is Revolutionary
+
+Unlike snippets which require pre-planning, `__selection__` enables **instant code transformation**:
+
+| Traditional Snippets | `__selection__` Method |
+|---------------------|------------------------|
+| Plan → Write snippet → Code | Code → Select → Transform |
+| Static placeholders | Dynamic existing content |
+| Editor-only workflow | Command-line integrated |
+| New code creation | Existing code enhancement |
+
+### Selection-Based Template Examples
+
+#### Error Handling Wrapper
+**File: `bash/error-handling.sh`**
+```bash
+#!/bin/bash
+set -euo pipefail
+
+main() {
+  {{__selection__}} || {
+    echo "Error: Command failed" >&2
+    exit 1
+  }
+}
+
+main "$@"
+```
+
+#### Function Wrapper
+**File: `bash/function-wrap.sh`**
+```bash
+{{function_name:-execute_command}}() {
+  local result
+  result=$({{__selection__}}) || {
+    echo "Error in {{function_name:-execute_command}}: Command failed" >&2
+    return 1
+  }
+  echo "$result"
+}
+```
+
+#### Python Try-Catch
+**File: `python/try-catch.py`**
+```python
+try:
+    {{__selection__}}
+except Exception as e:
+    print(f"Error: {e}", file=sys.stderr)
+    sys.exit(1)
+```
+
+#### Debug Logger
+**File: `any/debug-wrap.txt`**
+```
+echo "DEBUG: About to execute: {{__selection__}}"
+{{__selection__}}
+echo "DEBUG: Command completed with exit code: $?"
+```
+
+### Practical Use Cases
+
+#### 1. Command History Enhancement
+```bash
+# From history: complex git command
+git log --oneline --graph --decorate --branches | head -20
+
+# Select → Apply function template → Reusable function
+show_git_tree() {
+  git log --oneline --graph --decorate --branches | head -20
+}
+```
+
+#### 2. Script Development
+```bash
+# Working command in terminal
+find /var/log -name "*.log" -mtime +7 -delete
+
+# Transform to safe script with confirmation
+cleanup_old_logs() {
+  local files_to_delete
+  files_to_delete=$(find /var/log -name "*.log" -mtime +7)
+
+  if [[ -n "$files_to_delete" ]]; then
+    echo "Files to delete:"
+    echo "$files_to_delete"
+    read -p "Continue? (y/N): " confirm
+    [[ "$confirm" == "y" ]] && find /var/log -name "*.log" -mtime +7 -delete
+  fi
+}
+```
+
+#### 3. Code Block Enhancement
+```python
+# Existing working code
+data = requests.get("https://api.example.com/data").json()
+process_data(data)
+
+# Select → Apply error handling template
+try:
+    data = requests.get("https://api.example.com/data").json()
+    process_data(data)
+except requests.RequestException as e:
+    logger.error(f"API request failed: {e}")
+    raise
+except Exception as e:
+    logger.error(f"Data processing failed: {e}")
+    raise
+```
+
+### Integration with Development Workflow
+
+This approach integrates seamlessly with common development patterns:
+
+- **fc command**: `fc` opens last command in editor for selection-based templating
+- **History editing**: `history | grep pattern` → select command → wrap in function
+- **Interactive debugging**: Add logging/debugging around existing code blocks
+- **Script hardening**: Transform working commands into production-ready scripts
+
+The key insight: **Start with working code, then make it better**, rather than planning perfect code from the beginning.
 
 ## Template Examples
 
