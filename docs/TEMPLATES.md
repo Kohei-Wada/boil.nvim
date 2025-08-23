@@ -248,14 +248,19 @@ main "$@"
 #### Function Wrapper
 **File: `bash/function-wrap.sh`**
 ```bash
-{{function_name:-execute_command}}() {
+{{function_name}}() {
   local result
   result=$({{__selection__}}) || {
-    echo "Error in {{function_name:-execute_command}}: Command failed" >&2
+    echo "Error in {{function_name}}: Command failed" >&2
     return 1
   }
   echo "$result"
 }
+```
+
+**Usage:**
+```vim
+:Boil /path/to/templates/bash/function-wrap.sh function_name=cleanup_logs
 ```
 
 #### Python Try-Catch
